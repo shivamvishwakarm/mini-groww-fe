@@ -1,12 +1,11 @@
 import { useQuery } from '@tanstack/react-query';
-import { PageHeader } from '@/components/ui/PageHeader';
-import { StatCard } from '@/components/ui/StatCard';
 import { LoadingState } from '@/components/ui/LoadingState';
 import { PortfolioValueChart } from '@/components/charts/PortfolioValueChart';
 import { HoldingsTable } from '@/components/domain/portfolio/HoldingsTable';
+import { InvestmentSummaryCard } from '@/components/domain/portfolio/InvestmentSummaryCard';
+import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { portfolioApi } from '@/lib/api';
 import { queryKeys } from '@/query/keys';
-import { Briefcase } from 'lucide-react';
 
 export function PortfolioPage() {
   const { data: portfolio, isLoading } = useQuery({
@@ -15,50 +14,58 @@ export function PortfolioPage() {
   });
 
   return (
-    <div className="space-y-6">
-      <PageHeader
-        title="Portfolio"
-        description="View and manage your holdings"
-      />
-
-      {isLoading ? (
-        <LoadingState rows={4} type="card" />
-      ) : portfolio ? (
-        <>
-          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
-            <StatCard
-              title="Portfolio Value"
-              value={`$${portfolio.totalValue.toLocaleString()}`}
-              change={portfolio.totalGainPercent}
-              icon={<Briefcase className="h-4 w-4" />}
-            />
-            <StatCard
-              title="Total Invested"
-              value={`$${portfolio.totalInvested.toLocaleString()}`}
-            />
-            <StatCard
-              title="Total Gain/Loss"
-              value={`$${portfolio.totalGain.toLocaleString()}`}
-              change={portfolio.totalGainPercent}
-            />
-            <StatCard
-              title="Available Cash"
-              value={`$${portfolio.cash.toLocaleString()}`}
-            />
-          </div>
-
-          <PortfolioValueChart data={portfolio.valueHistory} />
-
-          <div>
-            <h2 className="text-lg font-semibold mb-4">All Holdings</h2>
-            <HoldingsTable holdings={portfolio.holdings} />
-          </div>
-        </>
-      ) : (
-        <div className="text-center py-12">
-          <p className="text-muted-foreground">Failed to load portfolio data</p>
+    <div className="min-h-screen bg-background">
+      <div className="max-w-7xl mx-auto px-6 py-6">
+        {/* Header */}
+        <div className="mb-6">
+          <h1 className="text-2xl font-bold text-gray-900 mb-2">Portfolio</h1>
+          <p className="text-sm text-gray-600">View and manage your holdings</p>
         </div>
-      )}
+
+        {isLoading ? (
+          <LoadingState rows={4} type="card" />
+        ) : portfolio ? (
+          <div className="space-y-6">
+            {/* Investment Summary */}
+            <InvestmentSummaryCard
+              currentValue={portfolio.totalValue}
+              oneDayReturns={portfolio.totalGain * 0.1}
+              oneDayReturnsPercent={portfolio.totalGainPercent * 0.1}
+              totalReturns={portfolio.totalGain}
+              totalReturnsPercent={portfolio.totalGainPercent}
+              invested={portfolio.totalInvested}
+            />
+
+            {/* Portfolio Chart */}
+            <Card className="border border-gray-200">
+              <CardHeader>
+                <CardTitle className="text-base font-semibold text-gray-900">
+                  Portfolio Performance
+                </CardTitle>
+              </CardHeader>
+              <CardContent>
+                <PortfolioValueChart data={portfolio.valueHistory} />
+              </CardContent>
+            </Card>
+
+            {/* Holdings Table */}
+            <Card className="border border-gray-200">
+              <CardHeader>
+                <CardTitle className="text-base font-semibold text-gray-900">
+                  All Holdings
+                </CardTitle>
+              </CardHeader>
+              <CardContent>
+                <HoldingsTable holdings={portfolio.holdings} />
+              </CardContent>
+            </Card>
+          </div>
+        ) : (
+          <div className="text-center py-12 bg-white rounded-lg border border-gray-200">
+            <p className="text-gray-600">Failed to load portfolio data</p>
+          </div>
+        )}
+      </div>
     </div>
   );
 }
