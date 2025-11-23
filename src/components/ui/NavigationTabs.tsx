@@ -1,5 +1,3 @@
-
-
 interface NavigationTabsProps {
     activeTab?: string;
     onTabChange?: (tab: string) => void;

@@ -22,7 +22,6 @@ export function HoldingsTable({ holdings, onSelectHolding }: HoldingsTableProps)
           <TableHeader>
             <TableRow>
               <TableHead>Symbol</TableHead>
-              <TableHead>Name</TableHead>
               <TableHead className="text-right">Quantity</TableHead>
               <TableHead className="text-right">Avg Price</TableHead>
               <TableHead className="text-right">Current Price</TableHead>
@@ -33,7 +32,7 @@ export function HoldingsTable({ holdings, onSelectHolding }: HoldingsTableProps)
           <TableBody>
             {holdings.map((holding) => (
               <HoldingRow
-                key={holding.id}
+                key={holding.symbol}
                 holding={holding}
                 onClick={() => onSelectHolding?.(holding)}
               />

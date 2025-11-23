@@ -25,13 +25,12 @@ export function OrdersTable({ orders }: OrdersTableProps) {
               <TableHead className="text-right">Quantity</TableHead>
               <TableHead className="text-right">Price</TableHead>
               <TableHead className="text-right">Total</TableHead>
-              <TableHead>Status</TableHead>
               <TableHead className="text-right">Date</TableHead>
             </TableRow>
           </TableHeader>
           <TableBody>
             {orders.map((order) => (
-              <OrderRow key={order.id} order={order} />
+              <OrderRow key={order._id} order={order} />
             ))}
           </TableBody>
         </Table>

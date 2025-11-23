@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import React, { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useMutation } from '@tanstack/react-query';
 import { Button } from '@/components/ui/button';
@@ -13,17 +13,19 @@ export function LoginPage() {
   const navigate = useNavigate();
   const dispatch = useAppDispatch();
   const [mode, setMode] = useState<AuthMode>('login');
-  const [email, setEmail] = useState('');
-  const [password, setPassword] = useState('');
+  const [name, setName] = useState('');
+  const [email, setEmail] = useState('shivam@example.com');
+  const [password, setPassword] = useState('Random@10');
   const [confirmPassword, setConfirmPassword] = useState('');
   const [showPassword, setShowPassword] = useState(false);
   const [showConfirmPassword, setShowConfirmPassword] = useState(false);
 
   const loginMutation = useMutation({
-    mutationFn: () => authApi.login(email, password),
+    mutationFn: () => authApi.login({ email, password }),
     onSuccess: (data) => {
-      if (data.success) {
-        dispatch(login({ user: data.user, token: data.token }));
+      if (data.success && data.data) {
+
+        dispatch(login({ user: data.data.user, token: data.data.token }));
         navigate('/dashboard');
       } else {
         alert(data.message);
@@ -31,6 +33,21 @@ export function LoginPage() {
     },
     onError: (error: unknown) => {
       alert(`Login failed: ${error}`);
+    },
+  });
+
+  const registerMutation = useMutation({
+    mutationFn: () => authApi.register({ name, email, password }),
+    onSuccess: (data) => {
+      if (data.success && data.data) {
+        dispatch(login({ user: data.data.user, token: data.data.token }));
+        navigate('/dashboard');
+      } else {
+        alert(data.message);
+      }
+    },
+    onError: (error: unknown) => {
+      alert(`Register failed: ${error}`);
     },
   });
 
@@ -43,7 +60,7 @@ export function LoginPage() {
         return;
       }
       // For demo, just log them in
-      loginMutation.mutate();
+      registerMutation.mutate();
     } else if (mode === 'forgot') {
       alert(`Password reset link sent to ${email}`);
       setMode('login');
@@ -131,6 +148,7 @@ export function LoginPage() {
                 </div>
 
                 <form onSubmit={handleSubmit} className="space-y-4">
+
                   <div>
                     <label className="block text-sm font-medium text-gray-300 mb-2">
                       Email Address
@@ -169,8 +187,8 @@ export function LoginPage() {
                     type="button"
                     onClick={() => setMode('login')}
                     className={`flex-1 py-2.5 text-sm font-semibold rounded-md transition-colors ${mode === 'login'
-                        ? 'bg-green-500 text-white'
-                        : 'text-gray-400 hover:text-white'
+                      ? 'bg-green-500 text-white'
+                      : 'text-gray-400 hover:text-white'
                       }`}
                   >
                     Login
@@ -179,8 +197,8 @@ export function LoginPage() {
                     type="button"
                     onClick={() => setMode('signup')}
                     className={`flex-1 py-2.5 text-sm font-semibold rounded-md transition-colors ${mode === 'signup'
-                        ? 'bg-green-500 text-white'
-                        : 'text-gray-400 hover:text-white'
+                      ? 'bg-green-500 text-white'
+                      : 'text-gray-400 hover:text-white'
                       }`}
                   >
                     Sign Up
@@ -188,6 +206,23 @@ export function LoginPage() {
                 </div>
 
                 <form onSubmit={handleSubmit} className="space-y-4">
+                  {mode === 'signup' && (
+                    <div>
+                      <label htmlFor="name" className="block text-sm font-medium text-gray-300 mb-2">
+                        Name
+                      </label>
+                      <input
+                        type="text"
+                        id="name"
+                        placeholder="Enter your name"
+                        value={name}
+                        onChange={(e) => setName(e.target.value)}
+                        className="w-full px-4 py-3 bg-[#1a1f2e] border border-gray-600 rounded-lg text-white placeholder-gray-500 focus:outline-none focus:border-green-500 transition-colors"
+                        required
+                      />
+                    </div>
+                  )}
+
                   <div>
                     <label className="block text-sm font-medium text-gray-300 mb-2">
                       Email Address

@@ -26,13 +26,12 @@ export function StockTable({ stocks, onSelectStock }: StockTableProps) {
               <TableHead className="text-right">Price</TableHead>
               <TableHead className="text-right">Change</TableHead>
               <TableHead className="text-right">Market Cap</TableHead>
-              <TableHead className="text-right">Volume</TableHead>
             </TableRow>
           </TableHeader>
           <TableBody>
             {stocks.map((stock) => (
               <StockRow
-                key={stock.id}
+                key={stock._id}
                 stock={stock}
                 onClick={() => onSelectStock?.(stock)}
               />

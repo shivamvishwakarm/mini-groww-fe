@@ -1,48 +1,45 @@
 // Stock types
 export interface Stock {
-  id: string;
+  _id: string;
   symbol: string;
   name: string;
-  price: number;
-  change: number;
-  changePercent: number;
-  marketCap: string;
-  volume: number;
-  peRatio: number;
+  sector: string;
+  currentPrice: number;
+  previousClose: number;
+  marketCap: number;
 }
 
-export interface StockPriceHistory {
+export interface StockPricePoint {
   date: string;
   price: number;
 }
 
 export interface StockDetail extends Stock {
-  description: string;
-  priceHistory: StockPriceHistory[];
+  priceHistory?: StockPricePoint[];
 }
 
 // Portfolio types
 export interface Holding {
-  id: string;
   symbol: string;
-  name: string;
   quantity: number;
-  averagePrice: number;
+  avgBuyPrice: number;
   currentPrice: number;
-  totalCost: number;
   currentValue: number;
-  gain: number;
-  gainPercent: number;
+  investedValue: number;
+  profitLoss: number;
+  profitLossPercent: number;
 }
 
 export interface PortfolioSummary {
-  totalValue: number;
-  totalInvested: number;
-  totalGain: number;
-  totalGainPercent: number;
-  cash: number;
   holdings: Holding[];
-  valueHistory: PortfolioValuePoint[];
+  totalInvestedValue: number;
+  totalCurrentValue: number;
+  totalProfitLoss: number;
+  totalProfitLossPercent: number;
+  availableBalance: number;
+  totalPortfolioValue: number;
+  // valueHistory is not currently provided by the API
+  valueHistory?: PortfolioValuePoint[];
 }
 
 export interface PortfolioValuePoint {
@@ -52,31 +49,27 @@ export interface PortfolioValuePoint {
 
 // Order types
 export type OrderSide = 'BUY' | 'SELL';
-export type OrderStatus = 'PENDING' | 'FILLED' | 'CANCELLED';
 
 export interface Order {
-  id: string;
+  _id: string;
+  userId: string;
   symbol: string;
   side: OrderSide;
   quantity: number;
   price: number;
-  totalAmount: number;
-  status: OrderStatus;
   createdAt: string;
-  filledAt?: string;
 }
 
 export interface CreateOrderRequest {
   symbol: string;
   side: OrderSide;
   quantity: number;
-  price: number;
 }
 
 export interface CreateOrderResponse {
   success: boolean;
-  orderId: string;
   message: string;
+  data?: Order;
 }
 
 // Auth types
@@ -85,36 +78,37 @@ export interface LoginRequest {
   password: string;
 }
 
-export interface LoginResponse {
-  success: boolean;
-  token: string;
-  user: User;
-  message: string;
+export interface RegisterRequest {
+  name: string;
+  email: string;
+  password: string;
 }
 
 export interface User {
   id: string;
-  email: string;
   name: string;
+  email: string;
+  balance: number;
+  createdAt: string;
 }
+
+export interface AuthResponse {
+  success: boolean;
+  message: string;
+  data?: {
+    user: User;
+    token: string;
+  };
+}
+
+export interface LoginResponse extends AuthResponse { }
+export interface RegisterResponse extends AuthResponse { }
 
 // Session types
 export interface SessionState {
   isAuthenticated: boolean;
   user: User | null;
   token: string | null;
-  loading: boolean;
-  error: string | null;
-}
-
-// Portfolio Redux state
-export interface PortfolioState {
-  holdings: Holding[];
-  totalValue: number;
-  totalInvested: number;
-  totalGain: number;
-  totalGainPercent: number;
-  cash: number;
   loading: boolean;
   error: string | null;
 }

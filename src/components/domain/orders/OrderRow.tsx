@@ -1,4 +1,4 @@
-import { ArrowUp, ArrowDown, CheckCircle, Clock } from 'lucide-react';
+import { ArrowUp, ArrowDown } from 'lucide-react';
 import { TableCell, TableRow } from '@/components/ui/table';
 import type { Order } from '@/lib/types';
 
@@ -8,7 +8,7 @@ interface OrderRowProps {
 
 export function OrderRow({ order }: OrderRowProps) {
   const isBuy = order.side === 'BUY';
-  const isFilled = order.status === 'FILLED';
+  const totalAmount = order.price * order.quantity;
 
   return (
     <TableRow>
@@ -27,21 +27,9 @@ export function OrderRow({ order }: OrderRowProps) {
       </TableCell>
       <TableCell className="text-right">{order.quantity}</TableCell>
       <TableCell className="text-right">${order.price.toFixed(2)}</TableCell>
-      <TableCell className="text-right">${order.totalAmount.toLocaleString()}</TableCell>
-      <TableCell>
-        <div className="flex items-center">
-          {isFilled ? (
-            <CheckCircle className="h-4 w-4 text-green-500 mr-2" />
-          ) : (
-            <Clock className="h-4 w-4 text-yellow-500 mr-2" />
-          )}
-          <span className={isFilled ? 'text-green-500' : 'text-yellow-500'}>
-            {order.status}
-          </span>
-        </div>
-      </TableCell>
+      <TableCell className="text-right">${totalAmount.toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 2 })}</TableCell>
       <TableCell className="text-right text-xs text-muted-foreground">
-        {new Date(order.createdAt).toLocaleDateString()}
+        {new Date(order.createdAt).toLocaleString()}
       </TableCell>
     </TableRow>
   );

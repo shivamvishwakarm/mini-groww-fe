@@ -1,113 +1,83 @@
-import axios from 'axios';
-import type { Stock, StockDetail, PortfolioSummary, Order, LoginResponse, CreateOrderRequest, CreateOrderResponse } from '../types';
-import { MOCK_STOCKS, MOCK_STOCK_DETAILS, MOCK_PORTFOLIO_SUMMARY, MOCK_ORDERS } from './mockData';
-
-// Simulated API base URL (will be replaced with real endpoint later)
-// const API_BASE_URL = 'http://localhost:3000/api';
-
-// Simulate network delay
-const delay = (ms: number) => new Promise(resolve => setTimeout(resolve, ms));
+import { client } from './client';
+import type {
+  Stock,
+  StockDetail,
+  PortfolioSummary,
+  Order,
+  LoginResponse,
+  LoginRequest,
+  RegisterRequest,
+  RegisterResponse,
+  CreateOrderRequest,
+  CreateOrderResponse,
+  StockPricePoint,
+} from '../types';
 
 // Auth API
 export const authApi = {
-  async login(email: string, password: string): Promise<LoginResponse> {
-    await delay(500);
-    
-    // Mock validation
-    if (!email || !password) {
-      return {
-        success: false,
-        token: '',
-        user: { id: '', email: '', name: '' },
-        message: 'Invalid email or password',
-      };
-    }
+  async login(data: LoginRequest): Promise<LoginResponse> {
+    const response = await client.post<LoginResponse>('/auth/login', data);
 
-    return {
-      success: true,
-      token: 'mock-jwt-token-' + Date.now(),
-      user: {
-        id: 'user-1',
-        email,
-        name: email.split('@')[0],
-      },
-      message: 'Login successful',
-    };
+    return response.data;
+  },
+
+  async register(data: RegisterRequest): Promise<RegisterResponse> {
+    const response = await client.post<RegisterResponse>('/auth/register', data);
+    return response.data;
   },
 
   async logout(): Promise<void> {
-    await delay(300);
+    // Cookie is handled by backend or we can just let it expire/be invalid
+    // If backend clears it, we don't need to do anything. 
+    // Or we can call an endpoint.
+    // For now, just doing nothing locally as the token is in httpOnly cookie usually?
+    // If it's not httpOnly, we can clear it. 
+    // But the user said "backend is able to set the token", implying backend handles it.
+    // Usually logout involves calling the backend.
+    await client.post('/auth/logout');
   },
+
+  async getMe() {
+    const response = await client.get('/auth/me');
+    return response.data;
+  }
 };
 
 // Stocks API
 export const stocksApi = {
   async fetchStocks(): Promise<Stock[]> {
-    await delay(600);
-    return MOCK_STOCKS;
+    const response = await client.get<{ success: boolean; data: Stock[] }>('/stocks');
+    return response.data.data;
   },
 
   async fetchStockBySymbol(symbol: string): Promise<StockDetail> {
-    await delay(500);
-    const stock = MOCK_STOCK_DETAILS[symbol];
-    if (!stock) {
-      throw new Error(`Stock ${symbol} not found`);
-    }
-    return stock;
+    const response = await client.get<{ success: boolean; data: StockDetail }>(`/stocks/${symbol}`);
+    return response.data.data;
   },
 
-  async fetchStockPriceHistory(symbol: string) {
-    await delay(400);
-    const stock = MOCK_STOCK_DETAILS[symbol];
-    if (!stock) {
-      throw new Error(`Stock ${symbol} not found`);
-    }
-    return stock.priceHistory;
+  async fetchStockPriceHistory(symbol: string): Promise<StockPricePoint[]> {
+    const response = await client.get<{ success: boolean; data: StockPricePoint[] }>(`/stocks/${symbol}/history`);
+    return response.data.data;
   },
 };
 
 // Portfolio API
 export const portfolioApi = {
   async fetchPortfolioSummary(): Promise<PortfolioSummary> {
-    await delay(700);
-    return MOCK_PORTFOLIO_SUMMARY;
+    const response = await client.get<{ success: boolean; data: PortfolioSummary }>('/portfolio');
+    return response.data.data;
   },
 };
 
 // Orders API
 export const ordersApi = {
   async fetchOrders(): Promise<Order[]> {
-    await delay(600);
-    return MOCK_ORDERS;
+    const response = await client.get<{ success: boolean; data: Order[] }>('/orders');
+    return response.data.data;
   },
 
   async createOrder(order: CreateOrderRequest): Promise<CreateOrderResponse> {
-    await delay(800);
-
-    // Validation
-    if (!order.symbol || !order.side || order.quantity <= 0 || order.price <= 0) {
-      return {
-        success: false,
-        orderId: '',
-        message: 'Invalid order parameters',
-      };
-    }
-
-    // Simulate successful order creation
-    return {
-      success: true,
-      orderId: 'order-' + Date.now(),
-      message: `${order.side} order for ${order.quantity} shares of ${order.symbol} created successfully`,
-    };
+    const response = await client.post<CreateOrderResponse>('/orders', order);
+    return response.data;
   },
-};
-
-// This will be used later to replace mock APIs with real ones
-export const createApiClient = (baseURL: string) => {
-  return axios.create({
-    baseURL,
-    headers: {
-      'Content-Type': 'application/json',
-    },
-  });
 };

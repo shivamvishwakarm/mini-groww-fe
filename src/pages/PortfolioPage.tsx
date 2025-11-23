@@ -28,25 +28,27 @@ export function PortfolioPage() {
           <div className="space-y-6">
             {/* Investment Summary */}
             <InvestmentSummaryCard
-              currentValue={portfolio.totalValue}
-              oneDayReturns={portfolio.totalGain * 0.1}
-              oneDayReturnsPercent={portfolio.totalGainPercent * 0.1}
-              totalReturns={portfolio.totalGain}
-              totalReturnsPercent={portfolio.totalGainPercent}
-              invested={portfolio.totalInvested}
+              currentValue={portfolio.totalCurrentValue}
+              oneDayReturns={0} // API does not provide 1D returns yet
+              oneDayReturnsPercent={0}
+              totalReturns={portfolio.totalProfitLoss}
+              totalReturnsPercent={portfolio.totalProfitLossPercent}
+              invested={portfolio.totalInvestedValue}
             />
 
             {/* Portfolio Chart */}
-            <Card className="border border-gray-200">
-              <CardHeader>
-                <CardTitle className="text-base font-semibold text-gray-900">
-                  Portfolio Performance
-                </CardTitle>
-              </CardHeader>
-              <CardContent>
-                <PortfolioValueChart data={portfolio.valueHistory} />
-              </CardContent>
-            </Card>
+            {portfolio.valueHistory && portfolio.valueHistory.length > 0 && (
+              <Card className="border border-gray-200">
+                <CardHeader>
+                  <CardTitle className="text-base font-semibold text-gray-900">
+                    Portfolio Performance
+                  </CardTitle>
+                </CardHeader>
+                <CardContent>
+                  <PortfolioValueChart data={portfolio.valueHistory} />
+                </CardContent>
+              </Card>
+            )}
 
             {/* Holdings Table */}
             <Card className="border border-gray-200">
