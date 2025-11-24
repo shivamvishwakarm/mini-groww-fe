@@ -7,6 +7,11 @@ export interface Stock {
   currentPrice: number;
   previousClose: number;
   marketCap: number;
+  // Optional fields that might be returned or computed
+  description?: string;
+  peRatio?: number;
+  change?: number;
+  changePercent?: number;
 }
 
 export interface StockPricePoint {
@@ -58,12 +63,14 @@ export interface Order {
   quantity: number;
   price: number;
   createdAt: string;
+  status: string;
 }
 
 export interface CreateOrderRequest {
   symbol: string;
   side: OrderSide;
   quantity: number;
+  price?: number;
 }
 
 export interface CreateOrderResponse {

@@ -51,11 +51,11 @@ export function TradeSummaryCard({ order }: TradeSummaryCardProps) {
 
         <div className="pt-4 border-t">
           <p className="text-sm text-muted-foreground">Total Amount</p>
-          <p className="text-2xl font-bold">${order.totalAmount.toLocaleString()}</p>
+          <p className="text-2xl font-bold">${(order.price * order.quantity).toString()}</p>
         </div>
 
         <div className="text-xs text-muted-foreground">
-          <p>Order ID: {order.id}</p>
+          <p>Order ID: {order._id}</p>
           <p>Created: {new Date(order.createdAt).toLocaleString()}</p>
         </div>
       </CardContent>

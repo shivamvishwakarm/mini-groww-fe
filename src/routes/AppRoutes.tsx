@@ -8,18 +8,29 @@ import { PortfolioPage } from '@/pages/PortfolioPage';
 import { OrdersPage } from '@/pages/OrdersPage';
 import { NotFoundPage } from '@/pages/NotFoundPage';
 import { ProtectedRoute } from './ProtectedRoute';
+import { AuthProvider } from '@/components/AuthProvider';
+
+import { Toaster } from 'sonner';
 
 export const routes = [
   {
     path: '/login',
-    element: <LoginPage />,
+    element: (
+      <>
+        <LoginPage />
+        <Toaster />
+      </>
+    ),
   },
   {
     path: '/',
     element: (
-      <ProtectedRoute>
-        <AppLayout />
-      </ProtectedRoute>
+      <AuthProvider>
+        <ProtectedRoute>
+          <AppLayout />
+          <Toaster />
+        </ProtectedRoute>
+      </AuthProvider>
     ),
     children: [
       {

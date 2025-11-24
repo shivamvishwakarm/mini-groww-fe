@@ -1,3 +1,4 @@
+import { useNavigate } from 'react-router-dom';
 import { useQuery } from '@tanstack/react-query';
 import { LoadingState } from '@/components/ui/LoadingState';
 import { PortfolioValueChart } from '@/components/charts/PortfolioValueChart';
@@ -8,6 +9,7 @@ import { portfolioApi } from '@/lib/api';
 import { queryKeys } from '@/query/keys';
 
 export function PortfolioPage() {
+  const navigate = useNavigate();
   const { data: portfolio, isLoading } = useQuery({
     queryKey: queryKeys.portfolio.summary(),
     queryFn: () => portfolioApi.fetchPortfolioSummary(),
@@ -58,7 +60,10 @@ export function PortfolioPage() {
                 </CardTitle>
               </CardHeader>
               <CardContent>
-                <HoldingsTable holdings={portfolio.holdings} />
+                <HoldingsTable
+                  holdings={portfolio.holdings}
+                  onSelectHolding={(holding) => navigate(`/stocks/${holding.symbol}`)}
+                />
               </CardContent>
             </Card>
           </div>

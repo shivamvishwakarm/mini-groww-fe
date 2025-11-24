@@ -11,12 +11,15 @@ import { queryKeys } from '@/query/keys';
 import { useAppSelector } from '@/lib/hooks';
 import { ArrowLeft } from 'lucide-react';
 import { useState } from 'react';
+import { toast } from 'sonner';
+
+import type { Order } from '@/lib/types';
 
 export function StockDetailPage() {
   const { symbol } = useParams<{ symbol: string }>();
   const navigate = useNavigate();
   const queryClient = useQueryClient();
-  const [lastOrder, setLastOrder] = useState(null);
+  const [lastOrder, setLastOrder] = useState<Order | null>(null);
   const { cash } = useAppSelector((state) => state.portfolio);
 
   const { data: stock, isLoading } = useQuery({
@@ -28,14 +31,19 @@ export function StockDetailPage() {
   const createOrderMutation = useMutation({
     mutationFn: ordersApi.createOrder,
     onSuccess: (data) => {
-      if (data.success) {
+      if (data.success && data.data) {
         queryClient.invalidateQueries({ queryKey: queryKeys.orders.list() });
         queryClient.invalidateQueries({
           queryKey: queryKeys.portfolio.summary(),
         });
-        setLastOrder(data as unknown as never);
+        setLastOrder(data.data);
         setTimeout(() => setLastOrder(null), 5000);
+      } else {
+        toast.error(data.message || 'Failed to create order');
       }
+    },
+    onError: (error) => {
+      toast.error(`Order failed: ${error}`);
     },
   });
 
@@ -69,7 +77,10 @@ export function StockDetailPage() {
     );
   }
 
-  const isPositive = stock.change >= 0;
+  const currentPrice = stock.currentPrice;
+  const change = stock.change ?? (stock.currentPrice - stock.previousClose);
+  const changePercent = stock.changePercent ?? ((change / stock.previousClose) * 100);
+  const isPositive = change >= 0;
 
   return (
     <div className="min-h-screen bg-background">
@@ -97,9 +108,9 @@ export function StockDetailPage() {
             <div className="grid grid-cols-2 md:grid-cols-4 gap-6">
               <div>
                 <p className="text-sm text-gray-600 mb-1">Current Price</p>
-                <p className="text-2xl font-bold text-gray-900">${stock.price.toFixed(2)}</p>
+                <p className="text-2xl font-bold text-gray-900">${currentPrice.toFixed(2)}</p>
                 <p className={`text-sm font-medium ${isPositive ? 'text-green-600' : 'text-red-600'}`}>
-                  {isPositive ? '+' : ''}${stock.change.toFixed(2)} ({isPositive ? '+' : ''}{stock.changePercent.toFixed(2)}%)
+                  {isPositive ? '+' : ''}${change.toFixed(2)} ({isPositive ? '+' : ''}{changePercent.toFixed(2)}%)
                 </p>
               </div>
               <div>
@@ -108,12 +119,12 @@ export function StockDetailPage() {
               </div>
               <div>
                 <p className="text-sm text-gray-600 mb-1">P/E Ratio</p>
-                <p className="text-lg font-semibold text-gray-900">{stock.peRatio}</p>
+                <p className="text-lg font-semibold text-gray-900">{stock.peRatio ?? 'N/A'}</p>
               </div>
               <div>
                 <p className="text-sm text-gray-600 mb-1">Change</p>
                 <p className={`text-lg font-semibold ${isPositive ? 'text-green-600' : 'text-red-600'}`}>
-                  {isPositive ? '+' : ''}${stock.change.toFixed(2)}
+                  {isPositive ? '+' : ''}${change.toFixed(2)}
                 </p>
               </div>
             </div>
@@ -125,7 +136,7 @@ export function StockDetailPage() {
           <div className="lg:col-span-2">
             <Card className="border border-gray-200">
               <CardContent className="p-6">
-                <StockPriceChart data={stock.priceHistory} symbol={stock.symbol} />
+                <StockPriceChart data={stock.priceHistory ?? []} symbol={stock.symbol} />
               </CardContent>
             </Card>
           </div>

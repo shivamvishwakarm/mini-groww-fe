@@ -9,6 +9,7 @@ import { zodResolver } from '@hookform/resolvers/zod';
 import { loginSchema, signupSchema, forgotPasswordSchema, type LoginFormValues, type SignupFormValues, type ForgotPasswordFormValues } from '@/lib/validations/auth';
 import { authApi } from '@/lib/api';
 import { TrendingUp, Eye, EyeOff } from 'lucide-react';
+import { toast } from 'sonner';
 
 type AuthMode = 'login' | 'signup' | 'forgot';
 
@@ -52,11 +53,11 @@ export function LoginPage() {
         dispatch(login({ user: data.data.user, token: data.data.token }));
         navigate('/dashboard');
       } else {
-        alert(data.message);
+        toast.error(data.message);
       }
     },
     onError: (error: unknown) => {
-      alert(`Login failed: ${error}`);
+      toast.error(`Login failed: ${error}`);
     },
   });
 
@@ -67,11 +68,11 @@ export function LoginPage() {
         dispatch(login({ user: data.data.user, token: data.data.token }));
         navigate('/dashboard');
       } else {
-        alert(data.message);
+        toast.error(data.message);
       }
     },
     onError: (error: unknown) => {
-      alert(`Register failed: ${error}`);
+      toast.error(`Register failed: ${error}`);
     },
   });
 
@@ -84,7 +85,7 @@ export function LoginPage() {
   };
 
   const onForgotSubmit = (data: ForgotPasswordFormValues) => {
-    alert(`Password reset link sent to ${data.email}`);
+    toast.success(`Password reset link sent to ${data.email}`);
     setMode('login');
     forgotPasswordForm.reset();
   };

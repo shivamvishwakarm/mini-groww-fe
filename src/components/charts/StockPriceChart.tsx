@@ -8,10 +8,10 @@ import {
   ResponsiveContainer,
 } from 'recharts';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
-import type { StockPriceHistory } from '@/lib/types';
+import type { StockPricePoint } from '@/lib/types';
 
 interface StockPriceChartProps {
-  data: StockPriceHistory[];
+  data: StockPricePoint[];
   symbol: string;
 }
 

@@ -1,4 +1,5 @@
 import { useState } from 'react';
+import { toast } from 'sonner';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Input } from '@/components/ui/input';
@@ -20,8 +21,8 @@ export function BuySellPanel({
   isLoading = false,
 }: BuySellPanelProps) {
   const [quantity, setQuantity] = useState(1);
-  const [buyPrice, setBuyPrice] = useState(stock.price);
-  const [sellPrice, setSellPrice] = useState(stock.price);
+  const [buyPrice, setBuyPrice] = useState(stock.currentPrice);
+  const [sellPrice, setSellPrice] = useState(stock.currentPrice);
 
   const buyTotal = quantity * buyPrice;
   const sellTotal = quantity * sellPrice;
@@ -29,7 +30,7 @@ export function BuySellPanel({
   const handleBuy = async () => {
     if (quantity <= 0) return;
     if (buyTotal > cash) {
-      alert('Insufficient cash');
+      toast.error('Insufficient cash');
       return;
     }
     await onCreateOrder({
@@ -39,7 +40,7 @@ export function BuySellPanel({
       price: buyPrice,
     });
     setQuantity(1);
-    setBuyPrice(stock.price);
+    setBuyPrice(stock.currentPrice);
   };
 
   const handleSell = async () => {
@@ -51,7 +52,7 @@ export function BuySellPanel({
       price: sellPrice,
     });
     setQuantity(1);
-    setSellPrice(stock.price);
+    setSellPrice(stock.currentPrice);
   };
 
   return (
