@@ -16,24 +16,25 @@ export function StockCard({ stock }: StockCardProps) {
 
     return (
         <Card
-            className="p-4 cursor-pointer hover:shadow-md transition-shadow border border-gray-200"
+            className="p-5 cursor-pointer hover:bg-slate-50 transition-all duration-200 border border-gray-100 rounded-xl bg-white min-w-[50px]"
             onClick={handleClick}
         >
-            <div className="flex items-start gap-3">
+            <div className="flex flex-col items-start h-full">
                 {/* Logo placeholder */}
-                <div className="w-10 h-10 rounded-full bg-gradient-to-br from-blue-400 to-purple-500 flex items-center justify-center text-white font-bold text-sm flex-shrink-0">
-                    {stock.symbol.substring(0, 2)}
+                <div className="w-12 h-12 rounded-xl border border-gray-100 bg-white flex items-center justify-center mb-4 shadow-sm">
+                    <div className="w-8 h-8 rounded-full bg-gradient-to-br from-orange-400 to-pink-500 flex items-center justify-center text-white font-bold text-xs">
+                        {stock.symbol.substring(0, 1)}
+                    </div>
                 </div>
 
-                <div className="flex-1 min-w-0">
-                    <h3 className="font-medium text-sm text-gray-900 truncate">{stock.name}</h3>
-                    <div className="mt-2">
-                        <div className="text-lg font-semibold text-gray-900">
-                            ₹{stock.price.toFixed(2)}
-                        </div>
-                        <div className={`text-xs font-medium mt-0.5 ${isPositive ? 'text-green-600' : 'text-red-600'}`}>
-                            {isPositive ? '+' : ''}{stock.change.toFixed(2)} ({isPositive ? '+' : ''}{stock.changePercent.toFixed(2)}%)
-                        </div>
+                <h3 className=" text-sm text-gray-700 mb-8 line-clamp-2">{stock.name}</h3>
+
+                <div className="mt-auto">
+                    <div className="text-sm font-medium text-gray-900 mb-1">
+                        ₹{stock.price.toFixed(2)}
+                    </div>
+                    <div className={`text-sm font-medium ${isPositive ? 'text-green-600' : 'text-red-500'}`}>
+                        {isPositive ? '+' : ''}{stock.change.toFixed(2)} ({stock.changePercent.toFixed(2)}%)
                     </div>
                 </div>
             </div>

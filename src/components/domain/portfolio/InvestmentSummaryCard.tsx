@@ -1,4 +1,4 @@
-import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
+import { Card, CardContent } from '@/components/ui/card';
 
 interface InvestmentSummaryCardProps {
     currentValue: number;
@@ -19,10 +19,7 @@ export function InvestmentSummaryCard({
 }: InvestmentSummaryCardProps) {
     return (
         <Card className="border border-gray-200">
-            <CardHeader className="pb-3">
-                <CardTitle className="text-base font-semibold text-gray-900">Your investments</CardTitle>
-            </CardHeader>
-            <CardContent className="space-y-3">
+            <CardContent className="space-y-3 pt-6">
                 <div>
                     <div className="text-sm text-gray-600">Current</div>
                     <div className="text-2xl font-bold text-gray-900">₹{currentValue.toLocaleString('en-IN')}</div>

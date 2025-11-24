@@ -1,5 +1,5 @@
 import { ChevronRight } from "lucide-react";
-import { Card, CardContent, CardHeader, CardTitle } from "../ui/card";
+import { Card, CardContent } from "../ui/card";
 import { InvestmentSummaryCard } from "../domain/portfolio/InvestmentSummaryCard";
 import { ProductToolCard } from "../domain/products/ProductToolCard";
 import { MarketMoverRow } from "../domain/market/MarketMoverRow";
@@ -25,122 +25,131 @@ export function Explore() {
         queryFn: () => portfolioApi.fetchPortfolioSummary(),
     });
     return (
-        <div className="max-w-7xl mx-auto px-6 py-6">
-            <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
-                {/* Left Column - Most bought stocks */}
-                <div className="lg:col-span-2">
-                    <Card className="border border-gray-200">
-                        <CardHeader className="flex flex-row items-center justify-between pb-3">
-                            <CardTitle className="text-base font-semibold text-gray-900">
-                                Most bought stocks on Groww
-                            </CardTitle>
-                            <button className="flex items-center text-sm text-primary hover:text-primary/80 font-medium">
-                                See more <ChevronRight className="h-4 w-4 ml-1" />
-                            </button>
-                        </CardHeader>
-                        <CardContent>
-                            <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
-                                {popularStocks.map((stock) => (
-                                    <StockCard key={stock.symbol} stock={stock} />
-                                ))}
-                            </div>
-                        </CardContent>
-                    </Card>
-                </div>
+        <div className="max-w-7xl mx-auto px-6 py-8">
+            <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
+                {/* Left Column - Market Data (span 2) */}
+                <div className="lg:col-span-2 space-y-12">
 
-                {/* Right Column - Investment Summary & Products */}
-                {isLoading ? (
-                    <LoadingState rows={4} type="card" />
-                ) : portfolio ? (
-                    <div className="space-y-6">
-                        {/* Investment Summary */}
-                        <InvestmentSummaryCard
-                            currentValue={portfolio.totalCurrentValue}
-                            oneDayReturns={0} // API does not provide 1D returns yet
-                            oneDayReturnsPercent={0}
-                            totalReturns={portfolio.totalProfitLoss}
-                            totalReturnsPercent={portfolio.totalProfitLossPercent}
-                            invested={portfolio.totalInvestedValue}
-                        />
+                    {/* Most Bought Stocks */}
+                    <section>
+                        <div className="flex items-center justify-between mb-6">
+                            <h2 className="text-xl font-semibold text-gray-900">Most bought stocks on Groww</h2>
+                        </div>
 
-                        {/* Products & Tools */}
-                        <Card className="border border-gray-200">
-                            <CardHeader className="pb-3">
-                                <CardTitle className="text-base font-semibold text-gray-900">
-                                    Products & Tools
-                                </CardTitle>
-                            </CardHeader>
-                            <CardContent className="space-y-2">
-                                {productsTools.map((product) => (
-                                    <ProductToolCard key={product.id} product={product} />
-                                ))}
-                            </CardContent>
-                        </Card>
-                    </div>
-                ) : null}
-            </div>
+                        <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-4 gap-4">
+                            {popularStocks.map((stock) => (
+                                <StockCard key={stock.symbol} stock={stock} />
+                            ))}
+                        </div>
 
-            {/* Top Market Movers */}
-            <div className="mt-6">
-                <Card className="border border-gray-200">
-                    <CardHeader className="pb-3">
-                        <CardTitle className="text-base font-semibold text-gray-900">
-                            Top market movers
-                        </CardTitle>
+                        <button className="flex items-center text-sm text-green-600 font-medium mt-4 hover:text-green-700 transition-colors">
+                            See more <ChevronRight className="h-4 w-4 ml-1" />
+                        </button>
+                    </section>
+
+                    {/* Top Market Movers */}
+                    <section>
+                        <div className="flex items-center justify-between mb-6">
+                            <h2 className="text-xl font-semibold text-gray-900">Top market movers</h2>
+                        </div>
+
                         {/* Filter Tabs */}
-                        <div className="flex items-center gap-2 mt-3">
+                        <div className="flex items-center gap-3 mb-6 overflow-x-auto pb-2">
                             <button
                                 onClick={() => setMarketMoverFilter('gainers')}
-                                className={`px-4 py-1.5 text-sm rounded-full transition-colors ${marketMoverFilter === 'gainers'
-                                    ? 'bg-gray-900 text-white'
-                                    : 'bg-gray-100 text-gray-700 hover:bg-gray-200'
+                                className={`px-5 py-2 text-sm font-medium rounded-full transition-all ${marketMoverFilter === 'gainers'
+                                    ? 'bg-gray-100 text-gray-900 border border-gray-200'
+                                    : 'bg-white text-gray-600 border border-gray-200 hover:bg-gray-50'
                                     }`}
                             >
                                 Gainers
                             </button>
                             <button
                                 onClick={() => setMarketMoverFilter('losers')}
-                                className={`px-4 py-1.5 text-sm rounded-full transition-colors ${marketMoverFilter === 'losers'
-                                    ? 'bg-gray-900 text-white'
-                                    : 'bg-gray-100 text-gray-700 hover:bg-gray-200'
+                                className={`px-5 py-2 text-sm font-medium rounded-full transition-all ${marketMoverFilter === 'losers'
+                                    ? 'bg-gray-100 text-gray-900 border border-gray-200'
+                                    : 'bg-white text-gray-600 border border-gray-200 hover:bg-gray-50'
                                     }`}
                             >
                                 Losers
                             </button>
                             <button
                                 onClick={() => setMarketMoverFilter('volume')}
-                                className={`px-4 py-1.5 text-sm rounded-full transition-colors ${marketMoverFilter === 'volume'
-                                    ? 'bg-gray-900 text-white'
-                                    : 'bg-gray-100 text-gray-700 hover:bg-gray-200'
+                                className={`px-5 py-2 text-sm font-medium rounded-full transition-all ${marketMoverFilter === 'volume'
+                                    ? 'bg-gray-100 text-gray-900 border border-gray-200'
+                                    : 'bg-white text-gray-600 border border-gray-200 hover:bg-gray-50'
                                     }`}
                             >
                                 Volume shockers
                             </button>
                             <button
                                 onClick={() => setMarketMoverFilter('nifty500')}
-                                className={`px-4 py-1.5 text-sm rounded-full border border-gray-300 transition-colors ${marketMoverFilter === 'nifty500'
-                                    ? 'bg-gray-900 text-white'
-                                    : 'bg-white text-gray-700 hover:bg-gray-50'
+                                className={`px-5 py-2 text-sm font-medium rounded-full border border-gray-200 transition-all ${marketMoverFilter === 'nifty500'
+                                    ? 'bg-gray-100 text-gray-900'
+                                    : 'bg-white text-gray-600 hover:bg-gray-50'
                                     }`}
                             >
-                                NIFTY 500 <span className="ml-1">▼</span>
+                                NIFTY 500 <span className="ml-1 text-xs">▼</span>
                             </button>
                         </div>
-                    </CardHeader>
-                    <CardContent className="p-0">
-                        {/* Table Header */}
-                        <div className="flex items-center justify-between px-4 py-2 bg-gray-50 border-t border-b border-gray-100">
-                            <div className="flex-1 text-xs font-medium text-gray-600">Company</div>
-                            <div className="px-4 text-xs font-medium text-gray-600">Market price (1D)</div>
-                            <div className="text-right min-w-[140px] text-xs font-medium text-gray-600">Volume</div>
+
+                        <Card className="border border-gray-200 shadow-sm overflow-hidden">
+                            <CardContent className="p-0">
+                                {/* Table Header */}
+                                <div className="flex items-center justify-between px-6 py-3 bg-gray-50/50 border-b border-gray-100">
+                                    <div className="flex-1 text-xs font-medium text-gray-500 uppercase tracking-wider">Company</div>
+                                    <div className="px-4 text-xs font-medium text-gray-500 uppercase tracking-wider">Market price (1D)</div>
+                                    <div className="text-right min-w-[140px] text-xs font-medium text-gray-500 uppercase tracking-wider">Volume</div>
+                                </div>
+                                {/* Market Movers List */}
+                                <div className="divide-y divide-gray-100">
+                                    {marketMovers.slice(0, 5).map((mover) => (
+                                        <MarketMoverRow key={mover.symbol} mover={mover} />
+                                    ))}
+                                </div>
+                            </CardContent>
+                        </Card>
+                    </section>
+                </div>
+
+                {/* Right Column - User & Products (span 1) */}
+                <div className="space-y-12">
+                    {isLoading ? (
+                        <LoadingState rows={4} type="card" />
+                    ) : portfolio ? (
+                        <section>
+                            <div className="flex items-center justify-between mb-6">
+                                <h2 className="text-xl font-semibold text-gray-900">Your investments</h2>
+                            </div>
+                            <InvestmentSummaryCard
+                                currentValue={portfolio.totalCurrentValue}
+                                oneDayReturns={0}
+                                oneDayReturnsPercent={0}
+                                totalReturns={portfolio.totalProfitLoss}
+                                totalReturnsPercent={portfolio.totalProfitLossPercent}
+                                invested={portfolio.totalInvestedValue}
+                            />
+                        </section>
+                    ) : null}
+
+                    <section>
+                        <div className="flex items-center justify-between mb-6">
+                            <h2 className="text-xl font-semibold text-gray-900">Products & Tools</h2>
                         </div>
-                        {/* Market Movers List */}
-                        {marketMovers.slice(0, 5).map((mover) => (
-                            <MarketMoverRow key={mover.symbol} mover={mover} />
-                        ))}
-                    </CardContent>
-                </Card>
+                        <Card className="border border-gray-200 shadow-sm overflow-hidden">
+                            <CardContent className="p-0">
+                                {productsTools.map((product) => (
+                                    <ProductToolCard
+                                        key={product.id}
+                                        product={product}
+                                        variant="row"
+                                    />
+                                ))}
+                            </CardContent>
+                        </Card>
+                    </section>
+                </div>
             </div>
         </div>
-    )
+    );
 }
