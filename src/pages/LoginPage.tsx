@@ -1,9 +1,12 @@
-import React, { useState } from 'react';
+import { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useMutation } from '@tanstack/react-query';
 import { Button } from '@/components/ui/button';
 import { useAppDispatch } from '@/lib/hooks';
 import { login } from '@/state/slices';
+import { useForm } from 'react-hook-form';
+import { zodResolver } from '@hookform/resolvers/zod';
+import { loginSchema, signupSchema, forgotPasswordSchema, type LoginFormValues, type SignupFormValues, type ForgotPasswordFormValues } from '@/lib/validations/auth';
 import { authApi } from '@/lib/api';
 import { TrendingUp, Eye, EyeOff } from 'lucide-react';
 
@@ -13,15 +16,36 @@ export function LoginPage() {
   const navigate = useNavigate();
   const dispatch = useAppDispatch();
   const [mode, setMode] = useState<AuthMode>('login');
-  const [name, setName] = useState('');
-  const [email, setEmail] = useState('shivam@example.com');
-  const [password, setPassword] = useState('Random@10');
-  const [confirmPassword, setConfirmPassword] = useState('');
   const [showPassword, setShowPassword] = useState(false);
   const [showConfirmPassword, setShowConfirmPassword] = useState(false);
 
+  const loginForm = useForm<LoginFormValues>({
+    resolver: zodResolver(loginSchema),
+    defaultValues: {
+      email: 'shivam@example.com',
+      password: 'Random@10',
+    },
+  });
+
+  const signupForm = useForm<SignupFormValues>({
+    resolver: zodResolver(signupSchema),
+    defaultValues: {
+      name: '',
+      email: '',
+      password: '',
+      confirmPassword: '',
+    },
+  });
+
+  const forgotPasswordForm = useForm<ForgotPasswordFormValues>({
+    resolver: zodResolver(forgotPasswordSchema),
+    defaultValues: {
+      email: '',
+    },
+  });
+
   const loginMutation = useMutation({
-    mutationFn: () => authApi.login({ email, password }),
+    mutationFn: (data: LoginFormValues) => authApi.login(data),
     onSuccess: (data) => {
       if (data.success && data.data) {
 
@@ -37,7 +61,7 @@ export function LoginPage() {
   });
 
   const registerMutation = useMutation({
-    mutationFn: () => authApi.register({ name, email, password }),
+    mutationFn: (data: SignupFormValues) => authApi.register({ name: data.name, email: data.email, password: data.password }),
     onSuccess: (data) => {
       if (data.success && data.data) {
         dispatch(login({ user: data.data.user, token: data.data.token }));
@@ -51,22 +75,18 @@ export function LoginPage() {
     },
   });
 
-  const handleSubmit = (e: React.FormEvent) => {
-    e.preventDefault();
+  const onLoginSubmit = (data: LoginFormValues) => {
+    loginMutation.mutate(data);
+  };
 
-    if (mode === 'signup') {
-      if (password !== confirmPassword) {
-        alert('Passwords do not match');
-        return;
-      }
-      // For demo, just log them in
-      registerMutation.mutate();
-    } else if (mode === 'forgot') {
-      alert(`Password reset link sent to ${email}`);
-      setMode('login');
-    } else {
-      loginMutation.mutate();
-    }
+  const onSignupSubmit = (data: SignupFormValues) => {
+    registerMutation.mutate(data);
+  };
+
+  const onForgotSubmit = (data: ForgotPasswordFormValues) => {
+    alert(`Password reset link sent to ${data.email}`);
+    setMode('login');
+    forgotPasswordForm.reset();
   };
 
   return (
@@ -147,8 +167,7 @@ export function LoginPage() {
                   </p>
                 </div>
 
-                <form onSubmit={handleSubmit} className="space-y-4">
-
+                <form onSubmit={forgotPasswordForm.handleSubmit(onForgotSubmit)} className="space-y-4">
                   <div>
                     <label className="block text-sm font-medium text-gray-300 mb-2">
                       Email Address
@@ -156,11 +175,12 @@ export function LoginPage() {
                     <input
                       type="email"
                       placeholder="Enter your email"
-                      value={email}
-                      onChange={(e) => setEmail(e.target.value)}
+                      {...forgotPasswordForm.register('email')}
                       className="w-full px-4 py-3 bg-[#1a1f2e] border border-gray-600 rounded-lg text-white placeholder-gray-500 focus:outline-none focus:border-green-500 transition-colors"
-                      required
                     />
+                    {forgotPasswordForm.formState.errors.email && (
+                      <p className="text-red-400 text-xs mt-1">{forgotPasswordForm.formState.errors.email.message}</p>
+                    )}
                   </div>
 
                   <Button
@@ -205,8 +225,8 @@ export function LoginPage() {
                   </button>
                 </div>
 
-                <form onSubmit={handleSubmit} className="space-y-4">
-                  {mode === 'signup' && (
+                {mode === 'signup' ? (
+                  <form onSubmit={signupForm.handleSubmit(onSignupSubmit)} className="space-y-4">
                     <div>
                       <label htmlFor="name" className="block text-sm font-medium text-gray-300 mb-2">
                         Name
@@ -215,56 +235,53 @@ export function LoginPage() {
                         type="text"
                         id="name"
                         placeholder="Enter your name"
-                        value={name}
-                        onChange={(e) => setName(e.target.value)}
+                        {...signupForm.register('name')}
                         className="w-full px-4 py-3 bg-[#1a1f2e] border border-gray-600 rounded-lg text-white placeholder-gray-500 focus:outline-none focus:border-green-500 transition-colors"
-                        required
                       />
+                      {signupForm.formState.errors.name && (
+                        <p className="text-red-400 text-xs mt-1">{signupForm.formState.errors.name.message}</p>
+                      )}
                     </div>
-                  )}
 
-                  <div>
-                    <label className="block text-sm font-medium text-gray-300 mb-2">
-                      Email Address
-                    </label>
-                    <input
-                      type="email"
-                      placeholder="Enter your email"
-                      value={email}
-                      onChange={(e) => setEmail(e.target.value)}
-                      className="w-full px-4 py-3 bg-[#1a1f2e] border border-gray-600 rounded-lg text-white placeholder-gray-500 focus:outline-none focus:border-green-500 transition-colors"
-                      required
-                    />
-                  </div>
-
-                  <div>
-                    <label className="block text-sm font-medium text-gray-300 mb-2">
-                      Password
-                    </label>
-                    <div className="relative">
+                    <div>
+                      <label className="block text-sm font-medium text-gray-300 mb-2">
+                        Email Address
+                      </label>
                       <input
-                        type={showPassword ? 'text' : 'password'}
-                        placeholder="Enter your password"
-                        value={password}
-                        onChange={(e) => setPassword(e.target.value)}
-                        className="w-full px-4 py-3 bg-[#1a1f2e] border border-gray-600 rounded-lg text-white placeholder-gray-500 focus:outline-none focus:border-green-500 transition-colors pr-12"
-                        required
+                        type="email"
+                        placeholder="Enter your email"
+                        {...signupForm.register('email')}
+                        className="w-full px-4 py-3 bg-[#1a1f2e] border border-gray-600 rounded-lg text-white placeholder-gray-500 focus:outline-none focus:border-green-500 transition-colors"
                       />
-                      <button
-                        type="button"
-                        onClick={() => setShowPassword(!showPassword)}
-                        className="absolute right-3 top-1/2 -translate-y-1/2 text-gray-400 hover:text-white transition-colors"
-                      >
-                        {showPassword ? (
-                          <EyeOff className="h-5 w-5" />
-                        ) : (
-                          <Eye className="h-5 w-5" />
-                        )}
-                      </button>
+                      {signupForm.formState.errors.email && (
+                        <p className="text-red-400 text-xs mt-1">{signupForm.formState.errors.email.message}</p>
+                      )}
                     </div>
-                  </div>
 
-                  {mode === 'signup' && (
+                    <div>
+                      <label className="block text-sm font-medium text-gray-300 mb-2">
+                        Password
+                      </label>
+                      <div className="relative">
+                        <input
+                          type={showPassword ? 'text' : 'password'}
+                          placeholder="Enter your password"
+                          {...signupForm.register('password')}
+                          className="w-full px-4 py-3 bg-[#1a1f2e] border border-gray-600 rounded-lg text-white placeholder-gray-500 focus:outline-none focus:border-green-500 transition-colors pr-12"
+                        />
+                        <button
+                          type="button"
+                          onClick={() => setShowPassword(!showPassword)}
+                          className="absolute right-3 top-1/2 -translate-y-1/2 text-gray-400 hover:text-white transition-colors"
+                        >
+                          {showPassword ? <EyeOff className="h-5 w-5" /> : <Eye className="h-5 w-5" />}
+                        </button>
+                      </div>
+                      {signupForm.formState.errors.password && (
+                        <p className="text-red-400 text-xs mt-1">{signupForm.formState.errors.password.message}</p>
+                      )}
+                    </div>
+
                     <div>
                       <label className="block text-sm font-medium text-gray-300 mb-2">
                         Confirm Password
@@ -273,57 +290,36 @@ export function LoginPage() {
                         <input
                           type={showConfirmPassword ? 'text' : 'password'}
                           placeholder="Confirm your password"
-                          value={confirmPassword}
-                          onChange={(e) => setConfirmPassword(e.target.value)}
+                          {...signupForm.register('confirmPassword')}
                           className="w-full px-4 py-3 bg-[#1a1f2e] border border-gray-600 rounded-lg text-white placeholder-gray-500 focus:outline-none focus:border-green-500 transition-colors pr-12"
-                          required
                         />
                         <button
                           type="button"
                           onClick={() => setShowConfirmPassword(!showConfirmPassword)}
                           className="absolute right-3 top-1/2 -translate-y-1/2 text-gray-400 hover:text-white transition-colors"
                         >
-                          {showConfirmPassword ? (
-                            <EyeOff className="h-5 w-5" />
-                          ) : (
-                            <Eye className="h-5 w-5" />
-                          )}
+                          {showConfirmPassword ? <EyeOff className="h-5 w-5" /> : <Eye className="h-5 w-5" />}
                         </button>
                       </div>
+                      {signupForm.formState.errors.confirmPassword && (
+                        <p className="text-red-400 text-xs mt-1">{signupForm.formState.errors.confirmPassword.message}</p>
+                      )}
                     </div>
-                  )}
 
-                  {mode === 'login' && (
-                    <div className="flex justify-end">
-                      <button
-                        type="button"
-                        onClick={() => setMode('forgot')}
-                        className="text-sm text-green-400 hover:text-green-300 transition-colors"
-                      >
-                        Forgot Password?
-                      </button>
-                    </div>
-                  )}
+                    <Button
+                      type="submit"
+                      disabled={registerMutation.isPending}
+                      className="w-full bg-green-500 hover:bg-green-600 text-white font-semibold py-3 rounded-lg transition-colors"
+                    >
+                      {registerMutation.isPending ? 'Creating Account...' : 'Create Account'}
+                    </Button>
 
-                  <Button
-                    type="submit"
-                    disabled={loginMutation.isPending}
-                    className="w-full bg-green-500 hover:bg-green-600 text-white font-semibold py-3 rounded-lg transition-colors"
-                  >
-                    {loginMutation.isPending
-                      ? 'Please wait...'
-                      : mode === 'signup'
-                        ? 'Create Account'
-                        : 'Continue'}
-                  </Button>
+                    {registerMutation.isError && (
+                      <div className="p-3 bg-red-500/10 border border-red-500/50 text-red-400 rounded-lg text-sm">
+                        Signup failed. Please try again.
+                      </div>
+                    )}
 
-                  {loginMutation.isError && (
-                    <div className="p-3 bg-red-500/10 border border-red-500/50 text-red-400 rounded-lg text-sm">
-                      {mode === 'signup' ? 'Signup failed. Please try again.' : 'Login failed. Please try again.'}
-                    </div>
-                  )}
-
-                  {mode === 'signup' && (
                     <p className="text-xs text-gray-400 text-center">
                       By signing up, you agree to our{' '}
                       <a href="#" className="text-green-400 hover:text-green-300">
@@ -334,12 +330,77 @@ export function LoginPage() {
                         Privacy Policy
                       </a>
                     </p>
-                  )}
+                  </form>
+                ) : (
+                  <form onSubmit={loginForm.handleSubmit(onLoginSubmit)} className="space-y-4">
+                    <div>
+                      <label className="block text-sm font-medium text-gray-300 mb-2">
+                        Email Address
+                      </label>
+                      <input
+                        type="email"
+                        placeholder="Enter your email"
+                        {...loginForm.register('email')}
+                        className="w-full px-4 py-3 bg-[#1a1f2e] border border-gray-600 rounded-lg text-white placeholder-gray-500 focus:outline-none focus:border-green-500 transition-colors"
+                      />
+                      {loginForm.formState.errors.email && (
+                        <p className="text-red-400 text-xs mt-1">{loginForm.formState.errors.email.message}</p>
+                      )}
+                    </div>
 
-                  <div className="text-center text-sm text-gray-500 pt-2">
-                    <p>Demo: Any email/password works</p>
-                  </div>
-                </form>
+                    <div>
+                      <label className="block text-sm font-medium text-gray-300 mb-2">
+                        Password
+                      </label>
+                      <div className="relative">
+                        <input
+                          type={showPassword ? 'text' : 'password'}
+                          placeholder="Enter your password"
+                          {...loginForm.register('password')}
+                          className="w-full px-4 py-3 bg-[#1a1f2e] border border-gray-600 rounded-lg text-white placeholder-gray-500 focus:outline-none focus:border-green-500 transition-colors pr-12"
+                        />
+                        <button
+                          type="button"
+                          onClick={() => setShowPassword(!showPassword)}
+                          className="absolute right-3 top-1/2 -translate-y-1/2 text-gray-400 hover:text-white transition-colors"
+                        >
+                          {showPassword ? <EyeOff className="h-5 w-5" /> : <Eye className="h-5 w-5" />}
+                        </button>
+                      </div>
+                      {loginForm.formState.errors.password && (
+                        <p className="text-red-400 text-xs mt-1">{loginForm.formState.errors.password.message}</p>
+                      )}
+                    </div>
+
+                    <div className="flex justify-end">
+                      <button
+                        type="button"
+                        onClick={() => setMode('forgot')}
+                        className="text-sm text-green-400 hover:text-green-300 transition-colors"
+                      >
+                        Forgot Password?
+                      </button>
+                    </div>
+
+                    <Button
+                      type="submit"
+                      disabled={loginMutation.isPending}
+                      className="w-full bg-green-500 hover:bg-green-600 text-white font-semibold py-3 rounded-lg transition-colors"
+                    >
+                      {loginMutation.isPending ? 'Please wait...' : 'Continue'}
+                    </Button>
+
+                    {loginMutation.isError && (
+                      <div className="p-3 bg-red-500/10 border border-red-500/50 text-red-400 rounded-lg text-sm">
+                        Login failed. Please try again.
+                      </div>
+                    )}
+
+                    <div className="text-center text-sm text-gray-500 pt-2">
+                      <p>Demo: Any email/password works</p>
+                    </div>
+                  </form>
+                )}
               </>
             )}
           </div>
