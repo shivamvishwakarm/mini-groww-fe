@@ -17,10 +17,10 @@ interface HoldingsTableProps {
 export function HoldingsTable({ holdings, onSelectHolding }: HoldingsTableProps) {
   return (
     <Card>
-      <CardContent className="pt-6">
+      <CardContent className="p-0 ">
         <Table>
-          <TableHeader className="bg-gray-100">
-            <TableRow>
+          <TableHeader >
+            <TableRow className="bg-gray-100 h-16 rounded-full">
               <TableHead className="w-[40%]">Company</TableHead>
               <TableHead className="text-right">Market price (1D%)</TableHead>
               <TableHead className="text-right">Returns (%)</TableHead>

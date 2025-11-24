@@ -1,10 +1,14 @@
 import { useState } from 'react';
+import { useMutation, useQueryClient } from '@tanstack/react-query';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Tabs, TabsList, TabsTrigger } from '@/components/ui/tabs';
-import { X, Settings, HelpCircle } from 'lucide-react';
+import { X, Settings, HelpCircle, Loader2 } from 'lucide-react';
 import type { Holding } from '@/lib/types';
+import { ordersApi } from '@/lib/api';
+import { queryKeys } from '@/query/keys';
+import { toast } from 'sonner';
 
 interface StockOrderPanelProps {
     holding: Holding;
@@ -15,9 +19,37 @@ interface StockOrderPanelProps {
 export function StockOrderPanel({ holding, onClose, balance = 0 }: StockOrderPanelProps) {
     const [side, setSide] = useState<'BUY' | 'SELL'>('BUY');
     const [quantity, setQuantity] = useState<string>('');
+    const queryClient = useQueryClient();
 
     // Mock price for now, ideally should come from real-time data
     const currentPrice = holding.currentPrice;
+
+    const { mutate: createOrder, isPending } = useMutation({
+        mutationFn: ordersApi.createOrder,
+        onSuccess: () => {
+            toast.success(`Successfully ${side === 'BUY' ? 'bought' : 'sold'} ${quantity} shares of ${holding.symbol}`);
+            queryClient.invalidateQueries({ queryKey: queryKeys.portfolio.summary() });
+            setQuantity('');
+            onClose();
+        },
+        onError: (error: any) => {
+            toast.error(error.response?.data?.message || 'Failed to place order');
+        },
+    });
+
+    const handleOrder = () => {
+        const qty = parseInt(quantity);
+        if (!qty || qty <= 0) {
+            toast.error('Please enter a valid quantity');
+            return;
+        }
+
+        createOrder({
+            symbol: holding.symbol,
+            side,
+            quantity: qty,
+        });
+    };
 
     return (
         <Card className="h-full flex flex-col border border-gray-200 shadow-sm">
@@ -70,6 +102,7 @@ export function StockOrderPanel({ holding, onClose, balance = 0 }: StockOrderPan
                             onChange={(e) => setQuantity(e.target.value)}
                             className="w-32 text-right font-medium"
                             placeholder="0"
+                            min="1"
                         />
                     </div>
 
@@ -92,9 +125,16 @@ export function StockOrderPanel({ holding, onClose, balance = 0 }: StockOrderPan
             <div className="p-4 border-t border-gray-100">
                 <div className="flex justify-between items-center mb-4 text-sm">
                     <span className="text-gray-500">Balance: ₹{balance.toLocaleString('en-IN')}</span>
-                    <span className="text-gray-500 border-b border-dashed border-gray-300">Approx req.: ₹{currentPrice * Number(quantity)}</span>
+                    <span className="text-gray-500 border-b border-dashed border-gray-300">Approx req.: ₹{(currentPrice * (Number(quantity) || 0)).toLocaleString('en-IN')}</span>
                 </div>
-                <Button className={`w-full py-6 text-lg font-semibold text-white ${side === 'BUY' ? 'bg-green-500 hover:bg-green-600' : 'bg-red-400 hover:bg-red-500'}`}>
+                <Button
+                    className={`w-full py-6 text-lg font-semibold text-white ${side === 'BUY' ? 'bg-green-500 hover:bg-green-600' : 'bg-red-400 hover:bg-red-500'}`}
+                    onClick={handleOrder}
+                    disabled={isPending}
+                >
+                    {isPending ? (
+                        <Loader2 className="h-5 w-5 animate-spin mr-2" />
+                    ) : null}
                     {side === 'BUY' ? 'Buy' : 'Sell'}
                 </Button>
             </div>
