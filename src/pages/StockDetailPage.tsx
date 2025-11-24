@@ -3,13 +3,14 @@ import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { Button } from '@/components/ui/button';
 import { LoadingState } from '@/components/ui/LoadingState';
 import { StockPriceChart } from '@/components/charts/StockPriceChart';
-import { BuySellPanel } from '@/components/domain/trading/BuySellPanel';
+import { StockOrderPanel } from '@/components/domain/portfolio/StockOrderPanel';
 import { Card, CardContent } from '@/components/ui/card';
 import { stocksApi, ordersApi } from '@/lib/api';
 import { queryKeys } from '@/query/keys';
 import { useAppSelector } from '@/lib/hooks';
 import { ArrowLeft } from 'lucide-react';
 import { toast } from 'sonner';
+
 
 export function StockDetailPage() {
   const { symbol } = useParams<{ symbol: string }>();
@@ -20,6 +21,12 @@ export function StockDetailPage() {
   const { data: stock, isLoading } = useQuery({
     queryKey: queryKeys.stocks.detail(symbol!),
     queryFn: () => stocksApi.fetchStockBySymbol(symbol!),
+    enabled: !!symbol,
+  });
+
+  const { data: history, isLoading: isHistoryLoading } = useQuery({
+    queryKey: queryKeys.stocks.priceHistory(symbol!),
+    queryFn: () => stocksApi.fetchStockPriceHistory(symbol!),
     enabled: !!symbol,
   });
 
@@ -129,20 +136,20 @@ export function StockDetailPage() {
         {/* Chart and Trading Panel */}
         <div className="grid grid-cols-1 lg:grid-cols-3 gap-6 mb-6">
           <div className="lg:col-span-2">
-            <Card className="border border-gray-200">
+            <Card className="border border-gray-200 border-none shadow-none">
               <CardContent className="p-6">
-                <StockPriceChart data={stock.priceHistory ?? []} symbol={stock.symbol} />
+                {isHistoryLoading ? (
+                  <LoadingState type="chart" />
+                ) : (
+                  <StockPriceChart data={history ?? []} symbol={stock.symbol} />
+                )}
               </CardContent>
             </Card>
           </div>
           <div>
-            <BuySellPanel
-              stock={stock}
-              cash={cash}
-              onCreateOrder={async (order) => {
-                await createOrderMutation.mutateAsync(order);
-              }}
-              isLoading={createOrderMutation.isPending}
+            <StockOrderPanel
+              holding={stock}
+              balance={cash}
             />
           </div>
         </div>

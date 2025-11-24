@@ -17,7 +17,7 @@ interface StockPriceChartProps {
 
 export function StockPriceChart({ data, symbol }: StockPriceChartProps) {
   return (
-    <Card>
+    <Card className="border border-gray-200 border-none shadow-none">
       <CardHeader>
         <CardTitle>{symbol} Price History</CardTitle>
       </CardHeader>

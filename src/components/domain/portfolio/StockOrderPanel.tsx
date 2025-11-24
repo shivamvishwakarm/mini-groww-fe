@@ -5,14 +5,14 @@ import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Tabs, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { X, Settings, HelpCircle, Loader2 } from 'lucide-react';
-import type { Holding } from '@/lib/types';
+import type { Holding, Stock } from '@/lib/types';
 import { ordersApi } from '@/lib/api';
 import { queryKeys } from '@/query/keys';
 import { toast } from 'sonner';
 
 interface StockOrderPanelProps {
-    holding: Holding;
-    onClose: () => void;
+    holding: Holding | Stock;
+    onClose?: () => void;
     balance?: number;
 }
 
@@ -30,7 +30,7 @@ export function StockOrderPanel({ holding, onClose, balance = 0 }: StockOrderPan
             toast.success(`Successfully ${side === 'BUY' ? 'bought' : 'sold'} ${quantity} shares of ${holding.symbol}`);
             queryClient.invalidateQueries({ queryKey: queryKeys.portfolio.summary() });
             setQuantity('');
-            onClose();
+            if (onClose) onClose();
         },
         onError: (error: any) => {
             toast.error(error.response?.data?.message || 'Failed to place order');
@@ -61,9 +61,11 @@ export function StockOrderPanel({ holding, onClose, balance = 0 }: StockOrderPan
                         <span className="text-red-500 ml-1">(-2.02%)</span> {/* Mock change */}
                     </div>
                 </div>
-                <Button variant="ghost" size="icon" className="h-8 w-8 text-gray-500" onClick={onClose}>
-                    <X className="h-5 w-5" />
-                </Button>
+                {onClose && (
+                    <Button variant="ghost" size="icon" className="h-8 w-8 text-gray-500" onClick={onClose}>
+                        <X className="h-5 w-5" />
+                    </Button>
+                )}
             </CardHeader>
 
             <CardContent className="flex-1 p-4 space-y-6">
