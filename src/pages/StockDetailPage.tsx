@@ -4,22 +4,17 @@ import { Button } from '@/components/ui/button';
 import { LoadingState } from '@/components/ui/LoadingState';
 import { StockPriceChart } from '@/components/charts/StockPriceChart';
 import { BuySellPanel } from '@/components/domain/trading/BuySellPanel';
-import { TradeSummaryCard } from '@/components/domain/trading/TradeSummaryCard';
 import { Card, CardContent } from '@/components/ui/card';
 import { stocksApi, ordersApi } from '@/lib/api';
 import { queryKeys } from '@/query/keys';
 import { useAppSelector } from '@/lib/hooks';
 import { ArrowLeft } from 'lucide-react';
-import { useState } from 'react';
 import { toast } from 'sonner';
-
-import type { Order } from '@/lib/types';
 
 export function StockDetailPage() {
   const { symbol } = useParams<{ symbol: string }>();
   const navigate = useNavigate();
   const queryClient = useQueryClient();
-  const [lastOrder, setLastOrder] = useState<Order | null>(null);
   const { cash } = useAppSelector((state) => state.portfolio);
 
   const { data: stock, isLoading } = useQuery({
@@ -36,8 +31,8 @@ export function StockDetailPage() {
         queryClient.invalidateQueries({
           queryKey: queryKeys.portfolio.summary(),
         });
-        setLastOrder(data.data);
-        setTimeout(() => setLastOrder(null), 5000);
+        toast.success('Order placed successfully');
+        navigate('/orders');
       } else {
         toast.error(data.message || 'Failed to create order');
       }
@@ -152,8 +147,6 @@ export function StockDetailPage() {
           </div>
         </div>
 
-        {/* Trade Summary */}
-        {lastOrder && <TradeSummaryCard order={lastOrder} />}
       </div>
     </div>
   );

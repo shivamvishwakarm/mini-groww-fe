@@ -10,7 +10,9 @@ function AppContent() {
 function App() {
   return (
     <BrowserRouter>
+
       <AppContent />
+
     </BrowserRouter>
   );
 }

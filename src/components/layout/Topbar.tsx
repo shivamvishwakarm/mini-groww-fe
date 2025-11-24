@@ -30,7 +30,7 @@ export function Topbar() {
   ];
 
   return (
-    <div className="border-b bg-white sticky top-0 z-20">
+    <div className="px-24  bg-white sticky top-0 z-20">
       <div className="flex items-center justify-between px-6 py-3">
         {/* Left section */}
         <div className="flex items-center gap-6">
@@ -42,17 +42,17 @@ export function Topbar() {
           </div>
 
           {/* Navigation links */}
-          <div className="hidden md:flex items-center gap-6 text-sm">
-            <a href="#" className="text-gray-900 font-medium">Stocks</a>
-            <a href="#" className="text-gray-600 hover:text-gray-900">F&O</a>
-            <a href="#" className="text-gray-600 hover:text-gray-900">Mutual Funds</a>
+          <div className="hidden md:flex items-center gap-6 text-lg">
+            <a href="/stocks" className="text-gray-900 font-medium">Stocks</a>
+            <a href="#" className="text-gray-500 ">F&O</a>
+            <a href="#" className="text-gray-500 ">Mutual Funds</a>
           </div>
         </div>
 
         {/* Right section */}
         <div className="flex items-center gap-4">
           {/* Search bar */}
-          <div className="hidden md:flex items-center gap-2 bg-gray-100 rounded-lg px-3 py-2 min-w-[300px]">
+          <div className="hidden md:flex items-center gap-2 border rounded-lg px-3 py-2 min-w-[300px]">
             <Search className="h-4 w-4 text-gray-500" />
             <input
               type="text"

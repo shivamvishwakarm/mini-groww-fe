@@ -20,11 +20,14 @@ export function DashboardPage() {
 
   return (
     <div className="min-h-screen bg-background">
-      {/* Market Ticker */}
-      <MarketTicker indices={marketIndices} />
+
 
       {/* Navigation Tabs */}
       <NavigationTabs activeTab={activeTab} onTabChange={setActiveTab} />
+      {/* Market Ticker */}
+      <MarketTicker indices={marketIndices} />
+
+
 
       {/* Main Content */}
       <div className="max-w-7xl mx-auto px-6 py-6">

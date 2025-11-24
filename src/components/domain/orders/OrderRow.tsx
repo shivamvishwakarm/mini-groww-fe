@@ -1,4 +1,3 @@
-import { ArrowUp, ArrowDown } from 'lucide-react';
 import { TableCell, TableRow } from '@/components/ui/table';
 import type { Order } from '@/lib/types';
 
@@ -7,7 +6,7 @@ interface OrderRowProps {
 }
 
 export function OrderRow({ order }: OrderRowProps) {
-  const isBuy = order.side === 'BUY';
+  const isSell = order.side === 'SELL';
   const totalAmount = order.price * order.quantity;
 
   return (
@@ -15,13 +14,8 @@ export function OrderRow({ order }: OrderRowProps) {
       <TableCell className="font-medium">{order.symbol}</TableCell>
       <TableCell>
         <div className="flex items-center">
-          {isBuy ? (
-            <ArrowDown className="h-4 w-4 text-red-500 mr-2" />
-          ) : (
-            <ArrowUp className="h-4 w-4 text-green-500 mr-2" />
-          )}
-          <span className={isBuy ? 'text-red-500' : 'text-green-500'}>
-            {isBuy ? 'BUY' : 'SELL'}
+          <span className={isSell ? 'text-red-500' : 'text-green-500'}>
+            {isSell ? 'SELL' : 'BUY'}
           </span>
         </div>
       </TableCell>
