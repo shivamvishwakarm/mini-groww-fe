@@ -13,11 +13,20 @@ import {
   marketMovers,
   productsTools,
 } from '@/lib/mockMarketData';
+import { useQuery } from '@tanstack/react-query';
+import { portfolioApi } from '@/lib/api';
+import { queryKeys } from '@/query/keys';
+import { LoadingState } from '@/components/ui/LoadingState';
 
 export function DashboardPage() {
   const [activeTab, setActiveTab] = useState('explore');
   const [marketMoverFilter, setMarketMoverFilter] = useState('gainers');
 
+
+  const { data: portfolio, isLoading } = useQuery({
+    queryKey: queryKeys.portfolio.summary(),
+    queryFn: () => portfolioApi.fetchPortfolioSummary(),
+  });
   return (
     <div className="min-h-screen bg-background">
 
@@ -54,31 +63,35 @@ export function DashboardPage() {
           </div>
 
           {/* Right Column - Investment Summary & Products */}
-          <div className="space-y-6">
-            {/* Investment Summary */}
-            <InvestmentSummaryCard
-              currentValue={4504}
-              oneDayReturns={-62.29}
-              oneDayReturnsPercent={-1.36}
-              totalReturns={-614.12}
-              totalReturnsPercent={-12.0}
-              invested={5118}
-            />
+          {isLoading ? (
+            <LoadingState rows={4} type="card" />
+          ) : portfolio ? (
+            <div className="space-y-6">
+              {/* Investment Summary */}
+              <InvestmentSummaryCard
+                currentValue={portfolio.totalCurrentValue}
+                oneDayReturns={0} // API does not provide 1D returns yet
+                oneDayReturnsPercent={0}
+                totalReturns={portfolio.totalProfitLoss}
+                totalReturnsPercent={portfolio.totalProfitLossPercent}
+                invested={portfolio.totalInvestedValue}
+              />
 
-            {/* Products & Tools */}
-            <Card className="border border-gray-200">
-              <CardHeader className="pb-3">
-                <CardTitle className="text-base font-semibold text-gray-900">
-                  Products & Tools
-                </CardTitle>
-              </CardHeader>
-              <CardContent className="space-y-2">
-                {productsTools.map((product) => (
-                  <ProductToolCard key={product.id} product={product} />
-                ))}
-              </CardContent>
-            </Card>
-          </div>
+              {/* Products & Tools */}
+              <Card className="border border-gray-200">
+                <CardHeader className="pb-3">
+                  <CardTitle className="text-base font-semibold text-gray-900">
+                    Products & Tools
+                  </CardTitle>
+                </CardHeader>
+                <CardContent className="space-y-2">
+                  {productsTools.map((product) => (
+                    <ProductToolCard key={product.id} product={product} />
+                  ))}
+                </CardContent>
+              </Card>
+            </div>
+          ) : null}
         </div>
 
         {/* Top Market Movers */}
