@@ -19,14 +19,12 @@ export function HoldingsTable({ holdings, onSelectHolding }: HoldingsTableProps)
     <Card>
       <CardContent className="pt-6">
         <Table>
-          <TableHeader>
+          <TableHeader className="bg-gray-100">
             <TableRow>
-              <TableHead>Symbol</TableHead>
-              <TableHead className="text-right">Quantity</TableHead>
-              <TableHead className="text-right">Avg Price</TableHead>
-              <TableHead className="text-right">Current Price</TableHead>
-              <TableHead className="text-right">Value</TableHead>
-              <TableHead className="text-right">Gain/Loss</TableHead>
+              <TableHead className="w-[40%]">Company</TableHead>
+              <TableHead className="text-right">Market price (1D%)</TableHead>
+              <TableHead className="text-right">Returns (%)</TableHead>
+              <TableHead className="text-right">Current (Invested)</TableHead>
             </TableRow>
           </TableHeader>
           <TableBody>

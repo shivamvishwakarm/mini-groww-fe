@@ -63,19 +63,12 @@ export function Portfolio() {
                             )}
 
                             {/* Holdings Table */}
-                            <Card className="border border-gray-200">
-                                <CardHeader>
-                                    <CardTitle className="text-base font-semibold text-gray-900">
-                                        All Holdings
-                                    </CardTitle>
-                                </CardHeader>
-                                <CardContent>
-                                    <HoldingsTable
-                                        holdings={portfolio.holdings}
-                                        onSelectHolding={setSelectedHolding}
-                                    />
-                                </CardContent>
-                            </Card>
+
+                            <HoldingsTable
+                                holdings={portfolio.holdings}
+                                onSelectHolding={setSelectedHolding}
+                            />
+
                         </div>
 
                         {/* Right Column: Order Panel / Placeholder */}
