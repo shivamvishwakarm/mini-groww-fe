@@ -62,15 +62,8 @@ export function Topbar() {
             <kbd className="text-xs text-gray-500 bg-white px-1.5 py-0.5 rounded border border-gray-300">⌘K</kbd>
           </div>
 
-          {/* Action buttons */}
-          <div className="hidden md:flex items-center gap-2">
-            <Button variant="ghost" size="sm" className="text-xs">
-              <span className="mr-1">📊</span> Terminal
-            </Button>
-            <Button variant="ghost" size="sm" className="text-xs">
-              9/5 trade →
-            </Button>
-          </div>
+
+
 
           {/* Notification bell */}
           <Button variant="ghost" size="icon">

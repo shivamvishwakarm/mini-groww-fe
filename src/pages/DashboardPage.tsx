@@ -39,12 +39,12 @@ export function DashboardPage() {
 
   return (
     <div className="min-h-screen bg-background">
-
+      {/* Navigation Tabs */}
+      <NavigationTabs activeTab={activeTab} onTabChange={setActiveTab} />
       {/* Market Ticker */}
       {indices && indices.length > 0 && <MarketTicker indices={indices} />}
 
-      {/* Navigation Tabs */}
-      <NavigationTabs activeTab={activeTab} onTabChange={setActiveTab} />
+
 
       {/* Content */}
       {renderContent()}

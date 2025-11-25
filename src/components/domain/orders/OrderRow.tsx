@@ -20,8 +20,8 @@ export function OrderRow({ order }: OrderRowProps) {
         </div>
       </TableCell>
       <TableCell className="text-right">{order.quantity}</TableCell>
-      <TableCell className="text-right">${order.price.toFixed(2)}</TableCell>
-      <TableCell className="text-right">${totalAmount.toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 2 })}</TableCell>
+      <TableCell className="text-right">₹{order.price.toFixed(2)}</TableCell>
+      <TableCell className="text-right">₹{totalAmount.toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 2 })}</TableCell>
       <TableCell className="text-right text-xs text-muted-foreground">
         {new Date(order.createdAt).toLocaleString()}
       </TableCell>
