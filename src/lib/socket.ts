@@ -69,6 +69,15 @@ export const subscribeToStock = (symbol: string) => {
     socket.emit('subscribe', { symbols: [symbol] });
 };
 
+export const subscribeToStocks = (symbols: string[]) => {
+    if (!socket) {
+        console.warn('Socket not initialized, cannot subscribe');
+        return;
+    }
+    console.log('Subscribing to stocks:', symbols);
+    socket.emit('subscribe', { symbols });
+};
+
 export const unsubscribeFromStock = (symbol: string) => {
     if (!socket) {
         console.warn('Socket not initialized, cannot unsubscribe');
@@ -76,6 +85,15 @@ export const unsubscribeFromStock = (symbol: string) => {
     }
     console.log('Unsubscribing from stock:', symbol);
     socket.emit('unsubscribe', { symbols: [symbol] });
+};
+
+export const unsubscribeFromStocks = (symbols: string[]) => {
+    if (!socket) {
+        console.warn('Socket not initialized, cannot unsubscribe');
+        return;
+    }
+    console.log('Unsubscribing from stocks:', symbols);
+    socket.emit('unsubscribe', { symbols });
 };
 
 export const disconnectSocket = () => {

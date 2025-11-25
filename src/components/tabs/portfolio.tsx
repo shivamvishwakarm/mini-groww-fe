@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import { useState, useEffect, useMemo } from 'react';
 
 import { useQuery } from '@tanstack/react-query';
 import { LoadingState } from '@/components/ui/LoadingState';
@@ -12,6 +12,8 @@ import { portfolioApi } from '@/lib/api';
 import { queryKeys } from '@/query/keys';
 import { StockSelectionPlaceholder } from '@/components/domain/portfolio/StockSelectionPlaceholder';
 import { StockOrderPanel } from '@/components/domain/portfolio/StockOrderPanel';
+import { subscribeToStocks, unsubscribeFromStocks } from '@/lib/socket';
+import { useAppSelector } from '@/lib/hooks';
 import type { Holding } from '@/lib/types';
 
 export function Portfolio() {
@@ -20,6 +22,46 @@ export function Portfolio() {
         queryKey: queryKeys.portfolio.summary(),
         queryFn: () => portfolioApi.fetchPortfolioSummary(),
     });
+
+    // Get real-time prices from Redux
+    const marketPrices = useAppSelector((state) => state.market.prices);
+
+    // Subscribe to all holdings for real-time updates
+    useEffect(() => {
+        if (portfolio?.holdings && portfolio.holdings.length > 0) {
+            const symbols = portfolio.holdings.map(h => h.symbol);
+            subscribeToStocks(symbols);
+
+            return () => {
+                unsubscribeFromStocks(symbols);
+            };
+        }
+    }, [portfolio?.holdings]);
+
+    // Calculate real-time portfolio values
+    const realTimeValues = useMemo(() => {
+        if (!portfolio?.holdings) return null;
+
+        let totalCurrentValue = 0;
+        let totalInvestedValue = 0;
+
+        portfolio.holdings.forEach(holding => {
+            const realtimePrice = marketPrices[holding.symbol]?.price ?? holding.currentPrice;
+            const currentValue = realtimePrice * holding.quantity;
+
+            totalCurrentValue += currentValue;
+            totalInvestedValue += holding.investedValue;
+        });
+
+        const totalProfitLoss = totalCurrentValue - totalInvestedValue;
+        const totalProfitLossPercent = (totalProfitLoss / totalInvestedValue) * 100;
+
+        return {
+            totalCurrentValue,
+            totalProfitLoss,
+            totalProfitLossPercent,
+        };
+    }, [portfolio?.holdings, marketPrices]);
 
     return (
         <div className="min-h-screen bg-background">
@@ -40,11 +82,11 @@ export function Portfolio() {
                         <div className="lg:col-span-2 space-y-6">
                             {/* Investment Summary */}
                             <PortfolioSummaryCard
-                                currentValue={portfolio.totalCurrentValue}
+                                currentValue={realTimeValues?.totalCurrentValue ?? portfolio.totalCurrentValue}
                                 oneDayReturns={0} // API does not provide 1D returns yet
                                 oneDayReturnsPercent={0}
-                                totalReturns={portfolio.totalProfitLoss}
-                                totalReturnsPercent={portfolio.totalProfitLossPercent}
+                                totalReturns={realTimeValues?.totalProfitLoss ?? portfolio.totalProfitLoss}
+                                totalReturnsPercent={realTimeValues?.totalProfitLossPercent ?? portfolio.totalProfitLossPercent}
                                 invested={portfolio.totalInvestedValue}
                             />
 

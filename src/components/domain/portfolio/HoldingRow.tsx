@@ -1,5 +1,6 @@
 
 import { TableCell, TableRow } from '@/components/ui/table';
+import { useAppSelector } from '@/lib/hooks';
 import type { Holding } from '@/lib/types';
 
 interface HoldingRowProps {
@@ -8,11 +9,18 @@ interface HoldingRowProps {
 }
 
 export function HoldingRow({ holding, onClick }: HoldingRowProps) {
-  const isPositive = holding.profitLoss >= 0;
-  // Mock 1D change for now as it's not in the API
-  const oneDayChange = -2.00;
-  const oneDayChangePercent = 0.21;
-  const isOneDayPositive = oneDayChange >= 0;
+  // Get real-time price from Redux
+  const realtimeData = useAppSelector((state) => state.market.prices[holding.symbol]);
+  const currentPrice = realtimeData?.price ?? holding.currentPrice;
+  const changePercent = realtimeData?.changePercent ?? 0;
+
+  // Recalculate values with real-time price
+  const currentValue = currentPrice * holding.quantity;
+  const profitLoss = currentValue - holding.investedValue;
+  const profitLossPercent = (profitLoss / holding.investedValue) * 100;
+
+  const isPositive = profitLoss >= 0;
+  const isOneDayPositive = changePercent >= 0;
 
   return (
     <TableRow onClick={onClick} className={`h-20 ${onClick ? 'cursor-pointer hover:bg-muted' : ''}`}>
@@ -36,25 +44,25 @@ export function HoldingRow({ holding, onClick }: HoldingRowProps) {
 
       {/* Market Price Column */}
       <TableCell className="text-right align-middle">
-        <div className="font-medium text-gray-900">₹{holding.currentPrice.toFixed(2)}</div>
+        <div className="font-medium text-gray-900">₹{currentPrice.toFixed(2)}</div>
         <div className={`text-xs mt-1 ${isOneDayPositive ? 'text-green-500' : 'text-red-500'}`}>
-          {isOneDayPositive ? '+' : ''}{oneDayChange.toFixed(2)} ({oneDayChangePercent.toFixed(2)}%)
+          {isOneDayPositive ? '+' : ''}{changePercent.toFixed(2)}%
         </div>
       </TableCell>
 
       {/* Returns Column */}
       <TableCell className="text-right align-middle">
         <div className="text-gray-500 text-sm">
-          {isPositive ? '+' : ''}₹{holding.profitLoss.toFixed(2)}
+          {isPositive ? '+' : ''}₹{profitLoss.toFixed(2)}
         </div>
-        <div className={`font-medium text-xs mt-1 ${isPositive ? 'text-green-500' : 'text-green-500'}`}>
-          {holding.profitLossPercent.toFixed(2)}%
+        <div className={`font-medium text-xs mt-1 ${isPositive ? 'text-green-500' : 'text-red-500'}`}>
+          {isPositive ? '+' : ''}{profitLossPercent.toFixed(2)}%
         </div>
       </TableCell>
 
       {/* Current (Invested) Column */}
       <TableCell className="text-right align-middle">
-        <div className="font-medium text-gray-900">₹{holding.currentValue.toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 2 })}</div>
+        <div className="font-medium text-gray-900">₹{currentValue.toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 2 })}</div>
         <div className="text-xs text-gray-500 mt-1">₹{holding.investedValue.toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 2 })}</div>
       </TableCell>
     </TableRow>

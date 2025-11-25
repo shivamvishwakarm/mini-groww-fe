@@ -1,4 +1,4 @@
-import { useState, useMemo } from 'react';
+import { useState, useMemo, useEffect } from 'react';
 import { useQuery } from '@tanstack/react-query';
 import { useNavigate } from 'react-router-dom';
 import { LoadingState } from '@/components/ui/LoadingState';
@@ -6,6 +6,7 @@ import { StockTable } from '@/components/domain/stocks/StockTable';
 import { stocksApi } from '@/lib/api';
 import { queryKeys } from '@/query/keys';
 import { Search } from 'lucide-react';
+import { subscribeToStocks, unsubscribeFromStocks } from '@/lib/socket';
 
 export function StocksPage() {
   const navigate = useNavigate();
@@ -16,6 +17,18 @@ export function StocksPage() {
     queryKey: queryKeys.stocks.list(),
     queryFn: () => stocksApi.fetchStocks(),
   });
+
+  // Subscribe to all stocks for real-time price updates
+  useEffect(() => {
+    if (stocks && stocks.length > 0) {
+      const symbols = stocks.map(stock => stock.symbol);
+      subscribeToStocks(symbols);
+
+      return () => {
+        unsubscribeFromStocks(symbols);
+      };
+    }
+  }, [stocks]);
 
   const filteredStocks = useMemo(() => {
     if (!stocks) return [];
