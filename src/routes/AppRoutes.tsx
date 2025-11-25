@@ -4,6 +4,7 @@ import { LoginPage } from '@/pages/LoginPage';
 import { DashboardPage } from '@/pages/DashboardPage';
 import { StocksPage } from '@/pages/StocksPage';
 import { StockDetailPage } from '@/pages/StockDetailPage';
+import { MostBoughtStocksPage } from '@/pages/MostBoughtStocksPage';
 import { PortfolioPage } from '@/pages/PortfolioPage';
 import { OrdersPage } from '@/pages/OrdersPage';
 import { NotFoundPage } from '@/pages/NotFoundPage';
@@ -48,6 +49,10 @@ export const routes = [
       {
         path: 'stocks/:symbol',
         element: <StockDetailPage />,
+      },
+      {
+        path: 'most-bought-stocks',
+        element: <MostBoughtStocksPage />,
       },
       {
         path: 'portfolio',

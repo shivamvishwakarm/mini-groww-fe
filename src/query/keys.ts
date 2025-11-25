@@ -4,6 +4,15 @@ export const queryKeys = {
     list: () => [...queryKeys.stocks.all, 'list'] as const,
     detail: (symbol: string) => [...queryKeys.stocks.all, 'detail', symbol] as const,
     priceHistory: (symbol: string) => [...queryKeys.stocks.all, 'priceHistory', symbol] as const,
+    mostBought: () => [...queryKeys.stocks.all, 'most-bought'] as const,
+    gainers: () => [...queryKeys.stocks.all, 'gainers'] as const,
+    losers: () => [...queryKeys.stocks.all, 'losers'] as const,
+    volumeShockers: () => [...queryKeys.stocks.all, 'volume-shockers'] as const,
+  },
+  indices: {
+    all: ['indices'] as const,
+    list: () => [...queryKeys.indices.all, 'list'] as const,
+    detail: (symbol: string) => [...queryKeys.indices.all, 'detail', symbol] as const,
   },
   portfolio: {
     all: ['portfolio'] as const,

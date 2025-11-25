@@ -1,6 +1,7 @@
-import { Card } from '@/components/ui/card';
-import type { Stock } from '@/lib/mockMarketData';
 import { useNavigate } from 'react-router-dom';
+import { Card } from '@/components/ui/card';
+import { useAppSelector } from '@/lib/hooks';
+import type { Stock } from '@/lib/types';
 
 interface StockCardProps {
     stock: Stock;
@@ -8,7 +9,13 @@ interface StockCardProps {
 
 export function StockCard({ stock }: StockCardProps) {
     const navigate = useNavigate();
-    const isPositive = stock.changePercent >= 0;
+
+    // Get real-time price from Redux
+    const realtimeData = useAppSelector((state) => state.market.prices[stock.symbol]);
+    const currentPrice = realtimeData?.price ?? stock.currentPrice;
+    const changePercent = realtimeData?.changePercent ?? 0;
+
+    const isPositive = changePercent >= 0;
 
     const handleClick = () => {
         navigate(`/stocks/${stock.symbol}`);
@@ -31,10 +38,10 @@ export function StockCard({ stock }: StockCardProps) {
 
                 <div className="mt-auto">
                     <div className="text-sm font-medium text-gray-900 mb-1">
-                        ₹{stock.price.toFixed(2)}
+                        ₹{currentPrice.toFixed(2)}
                     </div>
                     <div className={`text-sm font-medium ${isPositive ? 'text-green-600' : 'text-red-500'}`}>
-                        {isPositive ? '+' : ''}{stock.change.toFixed(2)} ({stock.changePercent.toFixed(2)}%)
+                        {isPositive ? '+' : ''}{changePercent.toFixed(2)}%
                     </div>
                 </div>
             </div>

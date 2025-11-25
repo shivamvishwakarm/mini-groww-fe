@@ -4,26 +4,127 @@ import { InvestmentSummaryCard } from "../domain/portfolio/InvestmentSummaryCard
 import { ProductToolCard } from "../domain/products/ProductToolCard";
 import { MarketMoverRow } from "../domain/market/MarketMoverRow";
 import { useQuery } from '@tanstack/react-query';
-import { portfolioApi } from '@/lib/api';
+import { useNavigate } from 'react-router-dom';
+import { portfolioApi, stocksApi } from '@/lib/api';
 import { queryKeys } from '@/query/keys';
 import { StockCard } from "../domain/stocks/StockCard";
 
 
 
 import {
-    popularStocks,
-    marketMovers,
     productsTools,
 } from '@/lib/mockMarketData';
 import { LoadingState } from "../ui/LoadingState";
-import { useState } from "react";
+import { useState, useEffect, useMemo } from "react";
+import { subscribeToStocks, unsubscribeFromStocks } from '@/lib/socket';
+import { useAppSelector } from '@/lib/hooks';
+
 export function Explore() {
+    const navigate = useNavigate();
     const [marketMoverFilter, setMarketMoverFilter] = useState('gainers');
 
     const { data: portfolio, isLoading } = useQuery({
         queryKey: queryKeys.portfolio.summary(),
         queryFn: () => portfolioApi.fetchPortfolioSummary(),
     });
+
+    const { data: mostBoughtStocks, isLoading: isMostBoughtLoading } = useQuery({
+        queryKey: queryKeys.stocks.mostBought(),
+        queryFn: () => stocksApi.fetchMostBoughtStocks(),
+    });
+
+    // Fetch market movers based on active filter
+    const { data: gainers, isLoading: isGainersLoading } = useQuery({
+        queryKey: queryKeys.stocks.gainers(),
+        queryFn: () => stocksApi.fetchGainers(),
+        enabled: marketMoverFilter === 'gainers',
+    });
+
+    const { data: losers, isLoading: isLosersLoading } = useQuery({
+        queryKey: queryKeys.stocks.losers(),
+        queryFn: () => stocksApi.fetchLosers(),
+        enabled: marketMoverFilter === 'losers',
+    });
+
+    const { data: volumeShockers, isLoading: isVolumeShockersLoading } = useQuery({
+        queryKey: queryKeys.stocks.volumeShockers(),
+        queryFn: () => stocksApi.fetchVolumeShockers(),
+        enabled: marketMoverFilter === 'volume',
+    });
+
+    // Determine which data to show based on filter
+    const marketMovers = useMemo(() => {
+        if (marketMoverFilter === 'gainers') return gainers || [];
+        if (marketMoverFilter === 'losers') return losers || [];
+        if (marketMoverFilter === 'volume') return volumeShockers || [];
+        return [];
+    }, [marketMoverFilter, gainers, losers, volumeShockers]);
+
+    const isMarketMoversLoading = isGainersLoading || isLosersLoading || isVolumeShockersLoading;
+
+    // Get real-time prices from Redux
+    const marketPrices = useAppSelector((state) => state.market.prices);
+
+    // Subscribe to all holdings for real-time updates
+    useEffect(() => {
+        if (portfolio?.holdings && portfolio.holdings.length > 0) {
+            const symbols = portfolio.holdings.map(h => h.symbol);
+            subscribeToStocks(symbols);
+
+            return () => {
+                unsubscribeFromStocks(symbols);
+            };
+        }
+    }, [portfolio?.holdings]);
+
+    // Subscribe to most bought stocks for real-time price updates
+    useEffect(() => {
+        if (mostBoughtStocks && mostBoughtStocks.length > 0) {
+            const symbols = mostBoughtStocks.map(s => s.symbol);
+            subscribeToStocks(symbols);
+
+            return () => {
+                unsubscribeFromStocks(symbols);
+            };
+        }
+    }, [mostBoughtStocks]);
+
+    // Subscribe to market movers for real-time price updates
+    useEffect(() => {
+        if (marketMovers && marketMovers.length > 0) {
+            const symbols = marketMovers.map(s => s.symbol);
+            subscribeToStocks(symbols);
+
+            return () => {
+                unsubscribeFromStocks(symbols);
+            };
+        }
+    }, [marketMovers]);
+
+    // Calculate real-time portfolio values
+    const realTimeValues = useMemo(() => {
+        if (!portfolio?.holdings) return null;
+
+        let totalCurrentValue = 0;
+        let totalInvestedValue = 0;
+
+        portfolio.holdings.forEach(holding => {
+            const realtimePrice = marketPrices[holding.symbol]?.price ?? holding.currentPrice;
+            const currentValue = realtimePrice * holding.quantity;
+
+            totalCurrentValue += currentValue;
+            totalInvestedValue += holding.investedValue;
+        });
+
+        const totalProfitLoss = totalCurrentValue - totalInvestedValue;
+        const totalProfitLossPercent = (totalProfitLoss / totalInvestedValue) * 100;
+
+        return {
+            totalCurrentValue,
+            totalProfitLoss,
+            totalProfitLossPercent,
+        };
+    }, [portfolio?.holdings, marketPrices]);
     return (
         <div className="max-w-7xl mx-auto px-6 py-8">
             <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
@@ -36,15 +137,28 @@ export function Explore() {
                             <h2 className="text-xl font-semibold text-gray-900">Most bought stocks on Groww</h2>
                         </div>
 
-                        <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-4 gap-4">
-                            {popularStocks.map((stock) => (
-                                <StockCard key={stock.symbol} stock={stock} />
-                            ))}
-                        </div>
+                        {isMostBoughtLoading ? (
+                            <LoadingState rows={1} type="card" />
+                        ) : mostBoughtStocks && mostBoughtStocks.length > 0 ? (
+                            <>
+                                <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-4 gap-4">
+                                    {mostBoughtStocks.slice(0, 4).map((stock) => (
+                                        <StockCard key={stock.symbol} stock={stock} />
+                                    ))}
+                                </div>
 
-                        <button className="flex items-center text-sm text-green-600 font-medium mt-4 hover:text-green-700 transition-colors">
-                            See more <ChevronRight className="h-4 w-4 ml-1" />
-                        </button>
+                                <button
+                                    onClick={() => navigate('/most-bought-stocks')}
+                                    className="flex items-center text-sm text-green-600 font-medium mt-4 hover:text-green-700 transition-colors cursor-pointer"
+                                >
+                                    See more <ChevronRight className="h-4 w-4 ml-1" />
+                                </button>
+                            </>
+                        ) : (
+                            <div className="text-center py-8 text-gray-500">
+                                No data available
+                            </div>
+                        )}
                     </section>
 
                     {/* Top Market Movers */}
@@ -102,11 +216,21 @@ export function Explore() {
                                     <div className="text-right min-w-[140px] text-xs font-medium text-gray-500 uppercase tracking-wider">Volume</div>
                                 </div>
                                 {/* Market Movers List */}
-                                <div className="divide-y divide-gray-100">
-                                    {marketMovers.slice(0, 5).map((mover) => (
-                                        <MarketMoverRow key={mover.symbol} mover={mover} />
-                                    ))}
-                                </div>
+                                {isMarketMoversLoading ? (
+                                    <div className="p-6">
+                                        <LoadingState rows={5} type="card" />
+                                    </div>
+                                ) : marketMovers.length > 0 ? (
+                                    <div className="divide-y divide-gray-100">
+                                        {marketMovers.slice(0, 5).map((mover) => (
+                                            <MarketMoverRow key={mover.symbol} mover={mover} />
+                                        ))}
+                                    </div>
+                                ) : (
+                                    <div className="p-6 text-center text-gray-500">
+                                        No data available
+                                    </div>
+                                )}
                             </CardContent>
                         </Card>
                     </section>
@@ -122,11 +246,11 @@ export function Explore() {
                                 <h2 className="text-xl font-semibold text-gray-900">Your investments</h2>
                             </div>
                             <InvestmentSummaryCard
-                                currentValue={portfolio.totalCurrentValue}
+                                currentValue={realTimeValues?.totalCurrentValue ?? portfolio.totalCurrentValue}
                                 oneDayReturns={0}
                                 oneDayReturnsPercent={0}
-                                totalReturns={portfolio.totalProfitLoss}
-                                totalReturnsPercent={portfolio.totalProfitLossPercent}
+                                totalReturns={realTimeValues?.totalProfitLoss ?? portfolio.totalProfitLoss}
+                                totalReturnsPercent={realTimeValues?.totalProfitLossPercent ?? portfolio.totalProfitLossPercent}
                                 invested={portfolio.totalInvestedValue}
                             />
                         </section>

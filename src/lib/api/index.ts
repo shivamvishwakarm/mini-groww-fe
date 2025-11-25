@@ -2,6 +2,7 @@ import { client } from './client';
 import type {
   Stock,
   StockDetail,
+  Index,
   PortfolioSummary,
   Order,
   LoginResponse,
@@ -45,18 +46,51 @@ export const authApi = {
 
 // Stocks API
 export const stocksApi = {
-  async fetchStocks(): Promise<Stock[]> {
+  fetchStocks: async (): Promise<Stock[]> => {
     const response = await client.get<{ success: boolean; data: Stock[] }>('/stocks');
     return response.data.data;
   },
 
-  async fetchStockBySymbol(symbol: string): Promise<StockDetail> {
+  fetchStockBySymbol: async (symbol: string): Promise<StockDetail> => {
     const response = await client.get<{ success: boolean; data: StockDetail }>(`/stocks/${symbol}`);
     return response.data.data;
   },
 
-  async fetchStockPriceHistory(symbol: string): Promise<StockPricePoint[]> {
+  fetchStockPriceHistory: async (symbol: string): Promise<StockPricePoint[]> => {
     const response = await client.get<{ success: boolean; data: StockPricePoint[] }>(`/stocks/${symbol}/history`);
+    return response.data.data;
+  },
+
+  fetchMostBoughtStocks: async (): Promise<Stock[]> => {
+    const response = await client.get<{ success: boolean; data: Stock[] }>('/stocks/most-bought');
+    return response.data.data;
+  },
+
+  fetchGainers: async (): Promise<Stock[]> => {
+    const response = await client.get<{ success: boolean; data: Stock[] }>('/stocks/gainers');
+    return response.data.data;
+  },
+
+  fetchLosers: async (): Promise<Stock[]> => {
+    const response = await client.get<{ success: boolean; data: Stock[] }>('/stocks/losers');
+    return response.data.data;
+  },
+
+  fetchVolumeShockers: async (): Promise<Stock[]> => {
+    const response = await client.get<{ success: boolean; data: Stock[] }>('/stocks/volume-shockers');
+    return response.data.data;
+  },
+};
+
+// Indices API
+export const indicesApi = {
+  fetchIndices: async (): Promise<Index[]> => {
+    const response = await client.get<{ success: boolean; data: Index[] }>('/indices');
+    return response.data.data;
+  },
+
+  fetchIndexBySymbol: async (symbol: string): Promise<Index> => {
+    const response = await client.get<{ success: boolean; data: Index }>(`/indices/${symbol}`);
     return response.data.data;
   },
 };

@@ -14,6 +14,16 @@ export interface Stock {
   changePercent?: number;
 }
 
+// Index types
+export interface Index {
+  symbol: string;
+  name: string;
+  currentValue: number;
+  previousClose: number;
+  change: number;
+  changePercent: number;
+}
+
 export interface StockPricePoint {
   date: string;
   price: number;
