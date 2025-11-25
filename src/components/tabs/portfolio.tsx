@@ -5,8 +5,6 @@ import { LoadingState } from '@/components/ui/LoadingState';
 import { PortfolioValueChart } from '@/components/charts/PortfolioValueChart';
 import { HoldingsTable } from '@/components/domain/portfolio/HoldingsTable';
 import { PortfolioSummaryCard } from '@/components/domain/portfolio/PortfolioSummaryCard';
-import { Button } from '@/components/ui/button';
-import { Eye } from 'lucide-react';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { portfolioApi } from '@/lib/api';
 import { queryKeys } from '@/query/keys';
