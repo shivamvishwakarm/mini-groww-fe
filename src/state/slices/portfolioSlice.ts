@@ -1,5 +1,16 @@
 import { createSlice, type PayloadAction } from '@reduxjs/toolkit';
-import type { PortfolioState, Holding } from '@/lib/types';
+import type { Holding } from '@/lib/types';
+
+interface PortfolioState {
+  holdings: Holding[];
+  totalValue: number;
+  totalInvested: number;
+  totalGain: number;
+  totalGainPercent: number;
+  cash: number;
+  loading: boolean;
+  error: string | null;
+}
 
 const initialState: PortfolioState = {
   holdings: [],
@@ -16,7 +27,7 @@ const portfolioSlice = createSlice({
   name: 'portfolio',
   initialState,
   reducers: {
-    setLoading: (state, action: PayloadAction<boolean>) => {
+    setPortfolioLoading: (state, action: PayloadAction<boolean>) => {
       state.loading = action.payload;
     },
     setHoldings: (state, action: PayloadAction<Holding[]>) => {
@@ -39,32 +50,31 @@ const portfolioSlice = createSlice({
       state.cash = action.payload.cash;
     },
     addHolding: (state, action: PayloadAction<Holding>) => {
-      const existing = state.holdings.find(h => h.symbol === action.payload.symbol);
+      const existing = state.holdings.find((h: Holding) => h.symbol === action.payload.symbol);
       if (existing) {
         const totalQuantity = existing.quantity + action.payload.quantity;
-        existing.averagePrice =
-          (existing.totalCost + action.payload.totalCost) / totalQuantity;
+        const totalCost = (existing.avgBuyPrice * existing.quantity) + (action.payload.avgBuyPrice * action.payload.quantity);
+        existing.avgBuyPrice = totalCost / totalQuantity;
         existing.quantity = totalQuantity;
-        existing.totalCost = existing.totalCost + action.payload.totalCost;
       } else {
         state.holdings.push(action.payload);
       }
     },
     removeHolding: (state, action: PayloadAction<string>) => {
-      state.holdings = state.holdings.filter(h => h.id !== action.payload);
+      state.holdings = state.holdings.filter((h: Holding) => h.symbol !== action.payload);
     },
-    setError: (state, action: PayloadAction<string | null>) => {
+    setPortfolioError: (state, action: PayloadAction<string | null>) => {
       state.error = action.payload;
     },
   },
 });
 
 export const {
-  setLoading,
+  setPortfolioLoading,
   setHoldings,
   updatePortfolioTotals,
   addHolding,
   removeHolding,
-  setError,
+  setPortfolioError,
 } = portfolioSlice.actions;
 export default portfolioSlice.reducer;

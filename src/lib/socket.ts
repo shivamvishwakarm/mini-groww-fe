@@ -18,7 +18,7 @@ export const initializeSocket = () => {
 
     // Connection event handlers
     socket.on('connect', () => {
-        console.log('WebSocket connected:', socket?.id);
+        // console.log('WebSocket connected:', socket?.id);
         store.dispatch(setConnected(true));
     });
 
@@ -34,23 +34,23 @@ export const initializeSocket = () => {
 
     // Listen for price history (sent after subscribe)
     socket.on('priceHistory', (data: { symbol: string; history: Array<{ price: number; timestamp: string }> }) => {
-        console.log('Received price history for', data.symbol, ':', data.history.length, 'points');
+        // console.log('Received price history for', data.symbol, ':', data.history.length, 'points');
         store.dispatch(setPriceHistory(data));
     });
 
     // Listen for live price updates
     socket.on('priceUpdate', (data: { symbol: string; price: number; changePercent: number; timestamp: string }) => {
-        console.log('Received price update:', data);
+        // console.log('Received price update:', data);
         store.dispatch(updatePrices([{ symbol: data.symbol, price: data.price, changePercent: data.changePercent }]));
     });
 
     // Listen for subscription confirmations
-    socket.on('subscribed', (data: { symbols: string[] }) => {
-        console.log('Subscribed to:', data.symbols);
+    socket.on('subscribed', (_data: { symbols: string[] }) => {
+        // console.log('Subscribed to:', data.symbols);
     });
 
-    socket.on('unsubscribed', (data: { symbols: string[] }) => {
-        console.log('Unsubscribed from:', data.symbols);
+    socket.on('unsubscribed', (_data: { symbols: string[] }) => {
+        // console.log('Unsubscribed from:', data.symbols);
     });
 
     socket.on('error', (error: { message: string }) => {
@@ -74,7 +74,7 @@ export const subscribeToStocks = (symbols: string[]) => {
         console.warn('Socket not initialized, cannot subscribe');
         return;
     }
-    console.log('Subscribing to stocks:', symbols);
+    // console.log('Subscribing to stocks:', symbols);
     socket.emit('subscribe', { symbols });
 };
 
@@ -83,7 +83,7 @@ export const unsubscribeFromStock = (symbol: string) => {
         console.warn('Socket not initialized, cannot unsubscribe');
         return;
     }
-    console.log('Unsubscribing from stock:', symbol);
+    // console.log('Unsubscribing from stock:', symbol);
     socket.emit('unsubscribe', { symbols: [symbol] });
 };
 
@@ -92,7 +92,7 @@ export const unsubscribeFromStocks = (symbols: string[]) => {
         console.warn('Socket not initialized, cannot unsubscribe');
         return;
     }
-    console.log('Unsubscribing from stocks:', symbols);
+    // console.log('Unsubscribing from stocks:', symbols);
     socket.emit('unsubscribe', { symbols });
 };
 

@@ -1,23 +1,23 @@
 import { useParams, useNavigate } from 'react-router-dom';
 import { useEffect } from 'react';
-import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
+import { useQuery } from '@tanstack/react-query';
 import { Button } from '@/components/ui/button';
 import { LoadingState } from '@/components/ui/LoadingState';
 import { StockPriceChart } from '@/components/charts/StockPriceChart';
 import { StockOrderPanel } from '@/components/domain/portfolio/StockOrderPanel';
 import { Card, CardContent } from '@/components/ui/card';
-import { stocksApi, ordersApi } from '@/lib/api';
+import { stocksApi } from '@/lib/api';
 import { queryKeys } from '@/query/keys';
 import { useAppSelector } from '@/lib/hooks';
 import { ArrowLeft } from 'lucide-react';
-import { toast } from 'sonner';
+
 import { subscribeToStock, unsubscribeFromStock } from '@/lib/socket';
 
 
 export function StockDetailPage() {
   const { symbol } = useParams<{ symbol: string }>();
   const navigate = useNavigate();
-  const queryClient = useQueryClient();
+
   const { cash } = useAppSelector((state) => state.portfolio);
 
   // Get real-time price and history from Redux 
@@ -44,24 +44,7 @@ export function StockDetailPage() {
     enabled: !!symbol,
   });
 
-  const createOrderMutation = useMutation({
-    mutationFn: ordersApi.createOrder,
-    onSuccess: (data) => {
-      if (data.success && data.data) {
-        queryClient.invalidateQueries({ queryKey: queryKeys.orders.list() });
-        queryClient.invalidateQueries({
-          queryKey: queryKeys.portfolio.summary(),
-        });
-        toast.success('Order placed successfully');
-        navigate('/orders');
-      } else {
-        toast.error(data.message || 'Failed to create order');
-      }
-    },
-    onError: (error) => {
-      toast.error(`Order failed: ${error}`);
-    },
-  });
+
 
   if (isLoading) {
     return (
