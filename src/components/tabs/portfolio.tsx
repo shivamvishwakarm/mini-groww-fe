@@ -69,9 +69,7 @@ export function Portfolio() {
                 {/* Header */}
                 <div className="mb-6 flex justify-between items-center">
                     <h1 className="text-xl font-medium text-gray-700 mb-2">Holdings ({portfolio?.holdings.length || 0})</h1>
-                    <Button variant="outline" size="icon" className="h-9 w-9 text-blue-600 border-blue-600 hover:bg-blue-50">
-                        <Eye className="h-4 w-4" />
-                    </Button>
+
                 </div>
 
                 {isLoading ? (

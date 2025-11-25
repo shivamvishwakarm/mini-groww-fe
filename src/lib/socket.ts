@@ -1,6 +1,7 @@
 import { io, type Socket } from 'socket.io-client';
 import { store } from '@/state/store';
 import { updatePrices, setConnected, setPriceHistory } from '@/state/slices/marketSlice';
+import { config } from '@/config/env';
 
 let socket: Socket | null = null;
 
@@ -11,7 +12,7 @@ export const initializeSocket = () => {
     }
 
     // Connect to WebSocket server
-    socket = io('http://localhost:3000', {
+    socket = io(`${config.apiBaseUrl}`, {
         withCredentials: true,
         transports: ['websocket', 'polling'],
     });
