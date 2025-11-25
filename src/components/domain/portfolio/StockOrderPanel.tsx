@@ -9,20 +9,24 @@ import type { Holding, Stock } from '@/lib/types';
 import { ordersApi } from '@/lib/api';
 import { queryKeys } from '@/query/keys';
 import { toast } from 'sonner';
+import { useAppSelector } from '@/lib/hooks';
 
 interface StockOrderPanelProps {
     holding: Holding | Stock;
     onClose?: () => void;
     balance?: number;
+    change?: number;
 }
 
-export function StockOrderPanel({ holding, onClose, balance = 0 }: StockOrderPanelProps) {
+export function StockOrderPanel({ holding, onClose, balance = 0, change = 0 }: StockOrderPanelProps) {
     const [side, setSide] = useState<'BUY' | 'SELL'>('BUY');
     const [quantity, setQuantity] = useState<string>('');
     const queryClient = useQueryClient();
 
-    // Mock price for now, ideally should come from real-time data
-    const currentPrice = holding.currentPrice;
+    // Get real-time price from Redux store, fallback to holding.currentPrice
+    const realtimePrice = useAppSelector((state) => state.market.prices[holding.symbol]);
+    const currentPrice = realtimePrice?.price ?? holding.currentPrice;
+    const percentageChange = change ?? 0;
 
     const { mutate: createOrder, isPending } = useMutation({
         mutationFn: ordersApi.createOrder,
@@ -51,6 +55,7 @@ export function StockOrderPanel({ holding, onClose, balance = 0 }: StockOrderPan
         });
     };
 
+    const isPositive = percentageChange >= 0;
     return (
         <Card className="h-full flex flex-col border border-gray-200 shadow-sm">
             <CardHeader className="flex flex-row items-start justify-between pb-2 space-y-0 border-b border-gray-100">
@@ -58,7 +63,9 @@ export function StockOrderPanel({ holding, onClose, balance = 0 }: StockOrderPan
                     <CardTitle className="text-lg font-bold text-gray-900">{holding.symbol}</CardTitle>
                     <div className="text-sm text-gray-500 mt-1">
                         NSE ₹{currentPrice.toLocaleString('en-IN')}
-                        <span className="text-red-500 ml-1">(-2.02%)</span> {/* Mock change */}
+                        <span className={`text-sm font-medium ml-2 ${isPositive ? 'text-green-600' : 'text-red-600'}`}>
+                            ( {isPositive ? '+' : ''}{percentageChange.toFixed(2)}%)
+                        </span>
                     </div>
                 </div>
                 {onClose && (

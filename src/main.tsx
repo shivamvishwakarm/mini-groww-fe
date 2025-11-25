@@ -6,6 +6,10 @@ import './index.css'
 import App from './App.tsx'
 import { store } from './state/store'
 import { queryClient } from './query/client'
+import { initializeSocket } from './lib/socket'
+
+// Initialize WebSocket connection
+initializeSocket();
 
 createRoot(document.getElementById('root')!).render(
   <StrictMode>

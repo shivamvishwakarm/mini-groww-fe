@@ -1,4 +1,5 @@
 import { useParams, useNavigate } from 'react-router-dom';
+import { useEffect } from 'react';
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { Button } from '@/components/ui/button';
 import { LoadingState } from '@/components/ui/LoadingState';
@@ -10,6 +11,7 @@ import { queryKeys } from '@/query/keys';
 import { useAppSelector } from '@/lib/hooks';
 import { ArrowLeft } from 'lucide-react';
 import { toast } from 'sonner';
+import { subscribeToStock, unsubscribeFromStock } from '@/lib/socket';
 
 
 export function StockDetailPage() {
@@ -18,15 +20,27 @@ export function StockDetailPage() {
   const queryClient = useQueryClient();
   const { cash } = useAppSelector((state) => state.portfolio);
 
+  // Get real-time price and history from Redux 
+  const realtimePrice = useAppSelector((state) =>
+    symbol ? state.market.prices[symbol] : undefined
+  );
+  const priceHistory = useAppSelector((state) =>
+    symbol ? state.market.history[symbol] : undefined
+  );
+
+  // Subscribe to stock updates on mount, unsubscribe on unmount
+  useEffect(() => {
+    if (symbol) {
+      subscribeToStock(symbol);
+      return () => {
+        unsubscribeFromStock(symbol);
+      };
+    }
+  }, [symbol]);
+
   const { data: stock, isLoading } = useQuery({
     queryKey: queryKeys.stocks.detail(symbol!),
     queryFn: () => stocksApi.fetchStockBySymbol(symbol!),
-    enabled: !!symbol,
-  });
-
-  const { data: history, isLoading: isHistoryLoading } = useQuery({
-    queryKey: queryKeys.stocks.priceHistory(symbol!),
-    queryFn: () => stocksApi.fetchStockPriceHistory(symbol!),
     enabled: !!symbol,
   });
 
@@ -79,8 +93,8 @@ export function StockDetailPage() {
     );
   }
 
-  const currentPrice = stock.currentPrice;
-  const change = stock.change ?? (stock.currentPrice - stock.previousClose);
+  const currentPrice = realtimePrice?.price ?? stock.currentPrice;
+  const change = stock.change ?? (currentPrice - stock.previousClose);
   const changePercent = stock.changePercent ?? ((change / stock.previousClose) * 100);
   const isPositive = change >= 0;
 
@@ -88,8 +102,8 @@ export function StockDetailPage() {
     <div className="min-h-screen bg-background">
       <div className="max-w-7xl mx-auto px-6 py-6">
         {/* Back Button */}
-        <Button variant="outline" onClick={() => navigate(-1)} className="mb-6">
-          <ArrowLeft className="h-4 w-4 mr-2" />
+        <Button variant="outline" onClick={() => navigate(-1)} className="mb-6 border-none shadow-none p-1 cursor-pointer">
+          <ArrowLeft className="h-4 w-4 " />
           Back
         </Button>
 
@@ -110,9 +124,9 @@ export function StockDetailPage() {
             <div className="grid grid-cols-2 md:grid-cols-4 gap-6">
               <div>
                 <p className="text-sm text-gray-600 mb-1">Current Price</p>
-                <p className="text-2xl font-bold text-gray-900">${currentPrice.toFixed(2)}</p>
+                <p className="text-2xl font-bold text-gray-900">₹{currentPrice.toFixed(2)}</p>
                 <p className={`text-sm font-medium ${isPositive ? 'text-green-600' : 'text-red-600'}`}>
-                  {isPositive ? '+' : ''}${change.toFixed(2)} ({isPositive ? '+' : ''}{changePercent.toFixed(2)}%)
+                  {isPositive ? '+' : ''}₹{change.toFixed(2)} ({isPositive ? '+' : ''}{changePercent.toFixed(2)}%)
                 </p>
               </div>
               <div>
@@ -126,7 +140,7 @@ export function StockDetailPage() {
               <div>
                 <p className="text-sm text-gray-600 mb-1">Change</p>
                 <p className={`text-lg font-semibold ${isPositive ? 'text-green-600' : 'text-red-600'}`}>
-                  {isPositive ? '+' : ''}${change.toFixed(2)}
+                  {isPositive ? '+' : ''}₹{change.toFixed(2)}
                 </p>
               </div>
             </div>
@@ -138,11 +152,7 @@ export function StockDetailPage() {
           <div className="lg:col-span-2">
             <Card className="border border-gray-200 border-none shadow-none">
               <CardContent className="p-6">
-                {isHistoryLoading ? (
-                  <LoadingState type="chart" />
-                ) : (
-                  <StockPriceChart data={history ?? []} symbol={stock.symbol} />
-                )}
+                <StockPriceChart data={priceHistory ?? []} symbol={stock.symbol} />
               </CardContent>
             </Card>
           </div>
@@ -150,6 +160,7 @@ export function StockDetailPage() {
             <StockOrderPanel
               holding={stock}
               balance={cash}
+              change={changePercent}
             />
           </div>
         </div>
