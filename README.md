@@ -26,7 +26,7 @@ Follow these steps to get the project running locally:
 1.  **Clone the repository**
 
     ```bash
-    git clone <repository-url>
+    git clone [<repository-url>](https://github.com/shivamvishwakarm/mini-groww-fe)
     cd fintech-clone/frontend
     ```
 
