@@ -136,3 +136,18 @@ export interface UIState {
   theme: 'light' | 'dark';
   loading: boolean;
 }
+// Watchlist types
+export interface WatchlistResponse {
+  success: boolean;
+  data: {
+    symbols: string[];
+  };
+}
+
+export interface AddToWatchlistRequest {
+  symbol: string;
+}
+
+export interface RemoveFromWatchlistRequest {
+  symbol: string;
+}

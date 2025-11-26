@@ -1,15 +1,16 @@
 import { useParams, useNavigate } from 'react-router-dom';
 import { useEffect } from 'react';
-import { useQuery } from '@tanstack/react-query';
+import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { Button } from '@/components/ui/button';
 import { LoadingState } from '@/components/ui/LoadingState';
 import { StockPriceChart } from '@/components/charts/StockPriceChart';
 import { StockOrderPanel } from '@/components/domain/portfolio/StockOrderPanel';
 import { Card, CardContent } from '@/components/ui/card';
-import { stocksApi } from '@/lib/api';
+import { stocksApi, watchlistApi } from '@/lib/api';
 import { queryKeys } from '@/query/keys';
 import { useAppSelector } from '@/lib/hooks';
-import { ArrowLeft } from 'lucide-react';
+import { ArrowLeft, Bookmark, BookmarkCheck } from 'lucide-react';
+import { toast } from 'sonner';
 
 import { subscribeToStock, unsubscribeFromStock } from '@/lib/socket';
 
@@ -17,6 +18,7 @@ import { subscribeToStock, unsubscribeFromStock } from '@/lib/socket';
 export function StockDetailPage() {
   const { symbol } = useParams<{ symbol: string }>();
   const navigate = useNavigate();
+  const queryClient = useQueryClient();
 
   const { cash } = useAppSelector((state) => state.portfolio);
 
@@ -42,6 +44,31 @@ export function StockDetailPage() {
     queryKey: queryKeys.stocks.detail(symbol!),
     queryFn: () => stocksApi.fetchStockBySymbol(symbol!),
     enabled: !!symbol,
+  });
+
+  const { data: watchlistSymbols } = useQuery({
+    queryKey: queryKeys.watchlist.list(),
+    queryFn: () => watchlistApi.getWatchlist(),
+  });
+
+  const isInWatchlist = watchlistSymbols?.includes(symbol || '');
+
+  const toggleWatchlistMutation = useMutation({
+    mutationFn: async () => {
+      if (!symbol) return;
+      if (isInWatchlist) {
+        await watchlistApi.removeFromWatchlist(symbol);
+      } else {
+        await watchlistApi.addToWatchlist(symbol);
+      }
+    },
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: queryKeys.watchlist.list() });
+      toast.success(isInWatchlist ? 'Removed from watchlist' : 'Added to watchlist');
+    },
+    onError: () => {
+      toast.error('Failed to update watchlist');
+    },
   });
 
 
@@ -91,14 +118,24 @@ export function StockDetailPage() {
         </Button>
 
         {/* Stock Header */}
-        <div className="mb-6">
-          <div className="flex items-baseline gap-3 mb-2">
-            <h1 className="text-3xl font-bold text-gray-900">{stock.symbol}</h1>
-            <span className="text-lg text-gray-600">{stock.name}</span>
+        <div className="mb-6 flex items-start justify-between">
+          <div>
+            <div className="flex items-baseline gap-3 mb-2">
+              <h1 className="text-3xl font-bold text-gray-900">{stock.symbol}</h1>
+              <span className="text-lg text-gray-600">{stock.name}</span>
+            </div>
+            {stock.description && (
+              <p className="text-sm text-gray-600">{stock.description}</p>
+            )}
           </div>
-          {stock.description && (
-            <p className="text-sm text-gray-600">{stock.description}</p>
-          )}
+          <Button
+            variant="outline"
+            size="icon"
+            onClick={() => toggleWatchlistMutation.mutate()}
+            className={`transition-colors ${isInWatchlist ? 'text-green-600 border-green-200 bg-green-50' : 'text-gray-400'}`}
+          >
+            {isInWatchlist ? <BookmarkCheck className="h-5 w-5" /> : <Bookmark className="h-5 w-5" />}
+          </Button>
         </div>
 
         {/* Price and Metrics */}

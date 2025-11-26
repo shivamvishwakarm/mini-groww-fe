@@ -26,4 +26,8 @@ export const queryKeys = {
     all: ['auth'] as const,
     login: () => [...queryKeys.auth.all, 'login'] as const,
   },
+  watchlist: {
+    all: ['watchlist'] as const,
+    list: () => [...queryKeys.watchlist.all, 'list'] as const,
+  },
 };

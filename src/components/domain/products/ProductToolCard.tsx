@@ -1,4 +1,5 @@
 import { Card } from '@/components/ui/card';
+import { useNavigate } from 'react-router-dom';
 import type { ProductTool } from '@/lib/mockMarketData';
 
 interface ProductToolCardProps {
@@ -8,10 +9,22 @@ interface ProductToolCardProps {
 }
 
 export function ProductToolCard({ product, onClick, variant = 'card' }: ProductToolCardProps) {
+    const navigate = useNavigate();
+
+    const handleClick = () => {
+        if (onClick) {
+            onClick();
+        } else {
+            navigate('/products');
+        }
+    };
+
     const badgeColors = {
         green: 'bg-green-50 text-green-700 border-green-200',
         blue: 'bg-blue-50 text-blue-700 border-blue-200',
         purple: 'bg-purple-50 text-purple-700 border-purple-200',
+        red: 'bg-red-50 text-red-700 border-red-200',
+        orange: 'bg-orange-50 text-orange-700 border-orange-200',
     };
 
     const content = (
@@ -35,7 +48,7 @@ export function ProductToolCard({ product, onClick, variant = 'card' }: ProductT
         return (
             <div
                 className="p-4 cursor-pointer hover:bg-gray-50 transition-colors border-b border-gray-100 last:border-0"
-                onClick={onClick}
+                onClick={handleClick}
             >
                 {content}
             </div>
@@ -45,7 +58,7 @@ export function ProductToolCard({ product, onClick, variant = 'card' }: ProductT
     return (
         <Card
             className="p-4 cursor-pointer hover:shadow-md transition-shadow border border-gray-200"
-            onClick={onClick}
+            onClick={handleClick}
         >
             {content}
         </Card>

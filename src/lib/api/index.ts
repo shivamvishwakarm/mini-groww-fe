@@ -12,6 +12,7 @@ import type {
   CreateOrderRequest,
   CreateOrderResponse,
   StockPricePoint,
+  WatchlistResponse,
 } from '../types';
 
 // Auth API
@@ -113,5 +114,21 @@ export const ordersApi = {
   async createOrder(order: CreateOrderRequest): Promise<CreateOrderResponse> {
     const response = await client.post<CreateOrderResponse>('/orders', order);
     return response.data;
+  },
+};
+
+// Watchlist API
+export const watchlistApi = {
+  async getWatchlist(): Promise<string[]> {
+    const response = await client.get<WatchlistResponse>('/watchlist');
+    return response.data.data.symbols;
+  },
+
+  async addToWatchlist(symbol: string): Promise<void> {
+    await client.post('/watchlist/add', { symbol });
+  },
+
+  async removeFromWatchlist(symbol: string): Promise<void> {
+    await client.post('/watchlist/remove', { symbol });
   },
 };

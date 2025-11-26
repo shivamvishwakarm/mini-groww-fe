@@ -1,13 +1,15 @@
 import { Navigate } from 'react-router-dom';
 import { AppLayout } from '@/components/layout/AppLayout';
 import { LoginPage } from '@/pages/LoginPage';
-import { DashboardPage } from '@/pages/DashboardPage';
-import { StocksPage } from '@/pages/StocksPage';
 import { StockDetailPage } from '@/pages/StockDetailPage';
 import { MostBoughtStocksPage } from '@/pages/MostBoughtStocksPage';
-import { PortfolioPage } from '@/pages/PortfolioPage';
-import { OrdersPage } from '@/pages/OrdersPage';
 import { NotFoundPage } from '@/pages/NotFoundPage';
+import { ExplorePage } from '@/pages/ExplorePage';
+import { HoldingsPage } from '@/pages/HoldingsPage';
+import { PositionsPage } from '@/pages/PositionsPage';
+import { OrdersTabPage } from '@/pages/OrdersTabPage';
+import { WatchlistPage } from '@/pages/WatchlistPage';
+import { ProductsPage } from '@/pages/ProductsPage';
 import { ProtectedRoute } from './ProtectedRoute';
 import { AuthProvider } from '@/components/AuthProvider';
 
@@ -36,15 +38,35 @@ export const routes = [
     children: [
       {
         path: '',
-        element: <Navigate to="/dashboard" replace />,
+        element: <Navigate to="/stocks/explore" replace />,
       },
       {
         path: 'dashboard',
-        element: <DashboardPage />,
+        element: <Navigate to="/stocks/explore" replace />,
       },
       {
         path: 'stocks',
-        element: <StocksPage />,
+        element: <Navigate to="/stocks/explore" replace />,
+      },
+      {
+        path: 'stocks/explore',
+        element: <ExplorePage />,
+      },
+      {
+        path: 'stocks/holdings',
+        element: <HoldingsPage />,
+      },
+      {
+        path: 'stocks/positions',
+        element: <PositionsPage />,
+      },
+      {
+        path: 'stocks/orders',
+        element: <OrdersTabPage />,
+      },
+      {
+        path: 'stocks/watchlist',
+        element: <WatchlistPage />,
       },
       {
         path: 'stocks/:symbol',
@@ -56,11 +78,15 @@ export const routes = [
       },
       {
         path: 'portfolio',
-        element: <PortfolioPage />,
+        element: <Navigate to="/stocks/holdings" replace />,
       },
       {
         path: 'orders',
-        element: <OrdersPage />,
+        element: <Navigate to="/stocks/orders" replace />,
+      },
+      {
+        path: 'products',
+        element: <ProductsPage />,
       },
     ],
   },
