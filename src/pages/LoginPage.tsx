@@ -397,9 +397,7 @@ export function LoginPage() {
                       </div>
                     )}
 
-                    <div className="text-center text-sm text-gray-500 pt-2">
-                      <p>Demo: Any email/password works</p>
-                    </div>
+
                   </form>
                 )}
               </>
@@ -408,7 +406,7 @@ export function LoginPage() {
 
           {/* Footer */}
           <p className="text-center text-sm text-gray-500 mt-6">
-            © 2024 Groww. All rights reserved.
+            © 2025 Groww. All rights reserved.
           </p>
         </div>
       </div>
