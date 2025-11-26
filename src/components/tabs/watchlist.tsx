@@ -15,7 +15,7 @@ import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Trash2, Search, ArrowUpDown } from 'lucide-react';
-import { LoadingState } from '@/components/ui/LoadingState';
+import { WatchlistSkeleton } from '@/components/ui/WatchlistSkeleton';
 import { toast } from 'sonner';
 
 export function Watchlist() {
@@ -96,7 +96,7 @@ export function Watchlist() {
     };
 
     if (isLoading) {
-        return <LoadingState rows={5} />;
+        return <WatchlistSkeleton />;
     }
 
     // Dummy Sparkline Component

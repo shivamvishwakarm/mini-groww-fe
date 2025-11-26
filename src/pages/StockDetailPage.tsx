@@ -2,7 +2,7 @@ import { useParams, useNavigate } from 'react-router-dom';
 import { useEffect } from 'react';
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { Button } from '@/components/ui/button';
-import { LoadingState } from '@/components/ui/LoadingState';
+import { StockDetailSkeleton } from '@/components/ui/StockDetailSkeleton';
 import { StockPriceChart } from '@/components/charts/StockPriceChart';
 import { StockOrderPanel } from '@/components/domain/portfolio/StockOrderPanel';
 import { Card, CardContent } from '@/components/ui/card';
@@ -74,17 +74,7 @@ export function StockDetailPage() {
 
 
   if (isLoading) {
-    return (
-      <div className="min-h-screen bg-background">
-        <div className="max-w-7xl mx-auto px-6 py-6">
-          <Button variant="outline" onClick={() => navigate(-1)} className="mb-6">
-            <ArrowLeft className="h-4 w-4 mr-2" />
-            Back
-          </Button>
-          <LoadingState type="chart" />
-        </div>
-      </div>
-    );
+    return <StockDetailSkeleton />;
   }
 
   if (!stock) {

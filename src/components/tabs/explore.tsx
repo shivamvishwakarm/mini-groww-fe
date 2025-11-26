@@ -14,7 +14,8 @@ import { StockCard } from "../domain/stocks/StockCard";
 import {
     productsTools,
 } from '@/lib/mockMarketData';
-import { LoadingState } from "../ui/LoadingState";
+import { ProductCardsSkeleton } from "../ui/ProductCardsSkeleton";
+import { StockTableSkeleton } from "../ui/StockTableSkeleton";
 import { useState, useEffect, useMemo } from "react";
 import { subscribeToStocks, unsubscribeFromStocks } from '@/lib/socket';
 import { useAppSelector } from '@/lib/hooks';
@@ -138,7 +139,7 @@ export function Explore() {
                         </div>
 
                         {isMostBoughtLoading ? (
-                            <LoadingState rows={1} type="card" />
+                            <ProductCardsSkeleton count={4} />
                         ) : mostBoughtStocks && mostBoughtStocks.length > 0 ? (
                             <>
                                 <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-4 gap-4">
@@ -218,7 +219,7 @@ export function Explore() {
                                 {/* Market Movers List */}
                                 {isMarketMoversLoading ? (
                                     <div className="p-6">
-                                        <LoadingState rows={5} type="card" />
+                                        <StockTableSkeleton rows={5} />
                                     </div>
                                 ) : marketMovers.length > 0 ? (
                                     <div className="divide-y divide-gray-100">
@@ -239,7 +240,7 @@ export function Explore() {
                 {/* Right Column - User & Products (span 1) */}
                 <div className="space-y-12">
                     {isLoading ? (
-                        <LoadingState rows={4} type="card" />
+                        <ProductCardsSkeleton count={4} />
                     ) : portfolio ? (
                         <section>
                             <div className="flex items-center justify-between mb-6">
