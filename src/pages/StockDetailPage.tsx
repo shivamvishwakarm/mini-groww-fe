@@ -10,6 +10,7 @@ import { stocksApi, watchlistApi } from '@/lib/api';
 import { queryKeys } from '@/query/keys';
 import { useAppSelector } from '@/lib/hooks';
 import { ArrowLeft, Bookmark, BookmarkCheck } from 'lucide-react';
+import { formatMarketCap } from '@/lib/utils/formatNumber';
 import { toast } from 'sonner';
 
 import { subscribeToStock, unsubscribeFromStock } from '@/lib/socket';
@@ -128,44 +129,45 @@ export function StockDetailPage() {
           </Button>
         </div>
 
-        {/* Price and Metrics */}
-        <Card className="mb-6 border border-gray-200">
-          <CardContent className="p-6">
-            <div className="grid grid-cols-2 md:grid-cols-4 gap-6">
-              <div>
-                <p className="text-sm text-gray-600 mb-1">Current Price</p>
-                <p className="text-2xl font-bold text-gray-900">₹{currentPrice.toFixed(2)}</p>
-                <p className={`text-sm font-medium ${isPositive ? 'text-green-600' : 'text-red-600'}`}>
-                  {isPositive ? '+' : ''}₹{change.toFixed(2)} ({isPositive ? '+' : ''}{changePercent.toFixed(2)}%)
-                </p>
-              </div>
-              <div>
-                <p className="text-sm text-gray-600 mb-1">Market Cap</p>
-                <p className="text-lg font-semibold text-gray-900">{stock.marketCap}</p>
-              </div>
-              <div>
-                <p className="text-sm text-gray-600 mb-1">P/E Ratio</p>
-                <p className="text-lg font-semibold text-gray-900">{stock.peRatio ?? 'N/A'}</p>
-              </div>
-              <div>
-                <p className="text-sm text-gray-600 mb-1">Change</p>
-                <p className={`text-lg font-semibold ${isPositive ? 'text-green-600' : 'text-red-600'}`}>
-                  {isPositive ? '+' : ''}₹{change.toFixed(2)}
-                </p>
-              </div>
-            </div>
-          </CardContent>
-        </Card>
 
         {/* Chart and Trading Panel */}
         <div className="grid grid-cols-1 lg:grid-cols-3 gap-6 mb-6">
-          <div className="lg:col-span-2">
+          {/* Left Column - Price Metrics and Chart */}
+          <div className="lg:col-span-2 space-y-6">
+            {/* Price and Metrics */}
+            <Card className="border border-gray-200">
+              <CardContent className="p-6">
+                <div className="grid grid-cols-2 md:grid-cols-3 gap-6">
+                  <div>
+                    <p className="text-sm text-gray-600 mb-1">Current Price</p>
+                    <p className="text-2xl font-bold text-gray-900">₹{currentPrice.toFixed(2)}</p>
+                    <p className={`text-sm font-medium ${isPositive ? 'text-green-600' : 'text-red-600'}`}>
+                      {isPositive ? '+' : ''}₹{change.toFixed(2)} ({isPositive ? '+' : ''}{changePercent.toFixed(2)}%)
+                    </p>
+                  </div>
+                  <div>
+                    <p className="text-sm text-gray-600 mb-1">Market Cap</p>
+                    <p className="text-lg font-semibold text-gray-900">{formatMarketCap(stock.marketCap)}</p>
+                  </div>
+                  <div>
+                    <p className="text-sm text-gray-600 mb-1">Change</p>
+                    <p className={`text-lg font-semibold ${isPositive ? 'text-green-600' : 'text-red-600'}`}>
+                      {isPositive ? '+' : ''}₹{change.toFixed(2)}
+                    </p>
+                  </div>
+                </div>
+              </CardContent>
+            </Card>
+
+            {/* Chart */}
             <Card className="border border-gray-200 border-none shadow-none">
               <CardContent className="p-6">
                 <StockPriceChart data={priceHistory ?? []} symbol={stock.symbol} />
               </CardContent>
             </Card>
           </div>
+
+          {/* Right Column - Stock Order Panel */}
           <div>
             <StockOrderPanel
               holding={stock}
