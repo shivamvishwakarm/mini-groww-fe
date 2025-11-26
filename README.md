@@ -27,7 +27,7 @@ Follow these steps to get the project running locally:
 
     ```bash
     git clone https://github.com/shivamvishwakarm/mini-groww-fe
-    cd fintech-clone/frontend
+    cd mini-groww-fe
     ```
 
 2.  **Install dependencies**
