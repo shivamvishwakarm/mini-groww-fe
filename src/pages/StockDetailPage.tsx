@@ -6,7 +6,7 @@ import { StockDetailSkeleton } from '@/components/ui/StockDetailSkeleton';
 import { StockPriceChart } from '@/components/charts/StockPriceChart';
 import { StockOrderPanel } from '@/components/domain/portfolio/StockOrderPanel';
 import { Card, CardContent } from '@/components/ui/card';
-import { stocksApi, watchlistApi } from '@/lib/api';
+import { portfolioApi, stocksApi, watchlistApi } from '@/lib/api';
 import { queryKeys } from '@/query/keys';
 import { useAppSelector } from '@/lib/hooks';
 import { ArrowLeft, Bookmark, BookmarkCheck } from 'lucide-react';
@@ -21,7 +21,10 @@ export function StockDetailPage() {
   const navigate = useNavigate();
   const queryClient = useQueryClient();
 
-  const { cash } = useAppSelector((state) => state.portfolio);
+  const { data: portfolio } = useQuery({
+    queryKey: queryKeys.portfolio.summary(),
+    queryFn: () => portfolioApi.fetchPortfolioSummary(),
+  });
 
   // Get real-time price and history from Redux 
   const realtimePrice = useAppSelector((state) =>
@@ -171,7 +174,7 @@ export function StockDetailPage() {
           <div>
             <StockOrderPanel
               holding={stock}
-              balance={cash}
+              balance={portfolio?.availableBalance}
               change={changePercent}
             />
           </div>
